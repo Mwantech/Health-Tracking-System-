@@ -1,0 +1,66 @@
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+  .banner {
+    padding: 30px 15px;
+  }
+
+  .rhombus-image {
+    width: 60vw;
+    height: 30vw;
+    transform: translateX(-25%);
+  }
+
+  .banner-right {
+    text-align: center;
+    padding: 15px;
+  }
+
+  .banner-right h1 {
+    font-size: 1.75rem;
+  }
+
+  .banner-right p {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .banner {
+    flex-direction: column;
+    padding: 20px 10px;
+  }
+
+  .rhombus-image {
+    width: 80vw;
+    height: 40vw;
+    clip-path: polygon(0% 50%, 25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%);
+    
+  }
+
+  .banner-right {
+    padding: 10px;
+  }
+
+  .banner-right h1 {
+    font-size: 1.5rem;
+  }
+
+  .banner-right p {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .rhombus-image {
+    width: 90vw;
+    height: 45vw;
+  }
+
+  .banner-right h1 {
+    font-size: 1.25rem;
+  }
+
+  .banner-right p {
+    font-size: 0.8rem;
+  }
+}

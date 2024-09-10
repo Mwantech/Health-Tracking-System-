@@ -1,0 +1,393 @@
+/* Global Styles */
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  line-height: 1.6;
+  color: #333;
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header */
+header {
+  background-color: #0073e6;
+  color: #fff;
+  padding: 20px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.header-content {
+  display: flex;
+  align-items: center; /* Aligns items vertically in the center */
+}
+
+.logo {
+  max-width: 70px; /* Adjust the size of the logo */
+  margin-right: 15px; /* Adds space between the logo and the heading */
+}
+
+.heading {
+  font-size: 24px; /* Adjust the size of the heading */
+  margin: 0; /* Removes default margin from the heading */
+}
+
+
+
+#main-nav ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  transition: left 0.3s ease-in-out;
+}
+
+#main-nav ul li {
+  margin: 0 15px;
+}
+
+#main-nav ul li a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+#menu-icon {
+  display: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #fff;
+}
+.search-bar {
+  padding: 8px;
+  border: none;
+  border-radius: 20px;
+  outline: none;
+}
+
+/* Banner Section Styling */
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background-color: #f5f5f5;
+}
+
+/* Left Side - Rhombus Image */
+.banner-left {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.rhombus-image {
+  width: 600px; /* Double the width to account for the half shape */
+  height: 300px; /* Height remains the same */
+  background: linear-gradient(to bottom right, #001f4d, #66b2ff);
+  clip-path: polygon(0% 50%, 25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%);
+  border-radius: 20px; /* Rounded corners */
+  transform: translateX(-30%); /* Positioning half of the rhombus */
+  transition: all 0.3s ease;
+}
+
+.banner-left:hover .rhombus-image {
+  transform: translateX(-50%) scale(1.05);
+}
+
+/* Right Side - Text Block */
+.banner-right {
+  flex: 1;
+  padding: 20px;
+  text-align: right;
+}
+
+.banner-right h1 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.banner-right p {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+
+.buttons {
+  display: flex;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 15px;
+  text-transform: uppercase;
+}
+
+.btn-primary {
+  background-color: #0073e6;
+  color: #fff;
+}
+
+.btn-secondary {
+  background-color: #f1f1f1;
+  color: #333;
+}
+
+/* Services Section */
+.services {
+  padding: 50px 0;
+  background-color: #fff;
+}
+
+.services h2 {
+  text-align: center;
+  margin-bottom: 40px;
+  font-size: 32px;
+  color: #0073e6;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.service-item {
+  text-align: center;
+  padding: 30px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  transition: transform 0.3s ease-in-out;
+  cursor: pointer;
+}
+
+.service-item:hover {
+  transform: translateY(-5px);
+  background-color: #f9f9f9;
+}
+
+.service-item i {
+  font-size: 40px;
+  margin-bottom: 15px;
+  color: #0073e6;
+}
+
+.service-item h3 {
+  margin-bottom: 15px;
+  font-size: 22px;
+  color: #333;
+}
+
+.service-item p {
+  color: #666;
+}
+
+/* Doctors Section */
+.doctors {
+  padding: 50px 0;
+  background-color: #f4f4f4;
+  text-align: center;
+}
+
+.doctors h2 {
+  font-size: 32px;
+  margin-bottom: 40px;
+  color: #0073e6;
+}
+
+.doctor-profile {
+  display: inline-block;
+  text-align: center;
+  margin: 20px;
+  width: 250px;
+}
+
+.doctor-profile img {
+  width: 100%;
+  border-radius: 50%;
+  margin-bottom: 15px;
+}
+
+.doctor-profile h3 {
+  font-size: 20px;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.doctor-profile p {
+  font-size: 16px;
+  color: #666;
+}
+
+.btn {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 20px;
+  text-transform: uppercase;
+  color: #fff;
+  background-color: #0073e6;
+}
+
+/* Testimonials Section */
+.testimonials {
+  padding: 50px 0;
+  background-color: #fff;
+  text-align: center;
+}
+
+.testimonials h2 {
+  font-size: 32px;
+  margin-bottom: 40px;
+  color: #0073e6;
+}
+
+.testimonial {
+  max-width: 600px;
+  margin: 0 auto;
+  font-style: italic;
+  color: #666;
+}
+
+.testimonial p {
+  margin-bottom: 10px;
+}
+
+.stars i {
+  color: #ffcd3c;
+}
+
+/* Newsletter Section */
+.newsletter {
+  padding: 50px 0;
+  background-color: #f4f4f4;
+  text-align: center;
+}
+
+.newsletter h2 {
+  font-size: 32px;
+  margin-bottom: 20px;
+  color: #0073e6;
+}
+
+.newsletter p {
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: #666;
+}
+
+.newsletter form {
+  display: flex;
+  justify-content: center;
+}
+
+.newsletter form input {
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  outline: none;
+  width: 300px;
+}
+
+.newsletter form button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  background-color: #0073e6;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+/* Footer */
+footer {
+  padding: 20px 0;
+  background-color: #0073e6;
+  color: #fff;
+  text-align: center;
+}
+
+.footer-links a {
+  color: #fff;
+  margin: 0 10px;
+  text-decoration: none;
+}
+
+.contact-info p {
+  margin: 5px 0;
+}
+
+.social-media a {
+  color: #fff;
+  margin: 0 10px;
+  font-size: 20px;
+}
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+  #menu-icon {
+    display: block;
+  }
+
+  #main-nav ul {
+    position: absolute;
+    top: 100%;
+    left: -100%;
+    width: 100%;
+    flex-direction: column;
+    background-color: #0073e6;
+  }
+
+  #main-nav ul.active {
+    left: 0;
+  }
+
+  #main-nav ul li {
+    margin: 10px 0;
+    text-align: center;
+  }
+  .search-bar {
+    width: 60%;
+    margin-top: 10px;
+  }
+
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .doctor-profile {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .banner-right h1 {
+    font-size: 24px;
+  }
+
+  .banner-right p {
+    font-size: 16px;
+  }
+
+  .btn-primary, .btn-secondary {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}
