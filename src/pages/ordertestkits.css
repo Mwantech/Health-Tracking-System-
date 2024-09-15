@@ -1,12 +1,7 @@
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
-  margin: 0;
-  padding: 0;
-}
+
 
 .App {
-  max-width: 600px;
+  max-width: 90%;
   margin: 50px auto;
   padding: 20px;
   background-color: #fff;
@@ -48,7 +43,7 @@ h1, h2 {
 }
 
 .kit-name:hover {
-  color: #0056b3;
+  color: #000;
 }
 
 .quantity-input {
@@ -90,4 +85,73 @@ h1, h2 {
 
 .btn:hover {
   background-color: #0056b3;
+}
+.selection-container .btn{
+  width: 200px;
+  padding: 10px;
+  border-radius: 15px;
+  transition: background-color 0.3s ease;
+}
+
+.review-container #back{
+  width: 200px;
+  padding: 10px;
+  border-radius: 12px;
+  background-color: #000;
+  color: #fff;
+}
+.review-container #back:hover{
+  background-color: #007bff;
+}
+.review-container .btn{
+  width: 400px;
+  padding: 15px;
+  margin-left: 100px;
+  border-radius: 20px;
+  background-color: rgb(57, 252, 39);
+  color: #000;
+}
+.review-container .btn:hover{
+  background-color: #007bff;
+  color: #fff;
+}
+.shipping-container #back{
+  width: 200px;
+  padding: 10px;
+  border-radius: 12px;
+  background-color: #000;
+  color: #fff;
+}
+.shipping-container #back{
+  background-color: #007bff;
+}
+.shipping-container .btn{
+  width: 400px;
+  padding: 15px;
+  margin-left: 100px;
+  border-radius: 20px;
+  background-color: rgb(57, 252, 39);
+  color: #000;
+}
+.shipping-container .btn:hover{
+  background-color: #007bff;
+  color: #fff;
+}
+.payment-container #back{
+  width: 200px;
+  padding: 10px;
+  border-radius: 12px;
+  background-color: #000;
+  color: #fff;
+}
+.payment-container #back:hover{
+  background-color: #007bff;
+}
+.payment-container .btn{
+  width: 400px;
+  padding: 15px;
+  margin-left: 100px;
+  border-radius: 20px;
+  background-color: rgb(250, 11, 3);
+  color: #fff;
 }

@@ -1,35 +1,47 @@
-import React, { useState } from 'react';
-import './header.css'; // Ensure to create this CSS file for styling
-import logo from '../assets/logo.png'; // Adjust the path according to your project structure
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import './Header.css';
+import Logo from '../assets/logo.png';
 
 const Header = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [isNavActive, setIsNavActive] = useState(false);
+  const [showAdminLink, setShowAdminLink] = useState(false);
+  const location = useLocation();
 
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
+  useEffect(() => {
+    // Check if the current path is the secret admin access path
+    setShowAdminLink(location.pathname === '/admin-access');
+  }, [location]);
+
+  const toggleNav = () => {
+    setIsNavActive(!isNavActive);
   };
 
   return (
-    <header>
-      <div className="container">
+    <header className="app-header">
+      <div className="header-container">
         <div className="header-content">
-          <img src={logo} alt="Health System Logo" className="logo" />
-          <h1 className="heading">NOVAS HEALTH SYSTEM</h1>
+          <div className="logo-title">
+            <img src={Logo} alt="Health System Logo" className="logo" />
+            <h1 className="heading">NOVAS HEALTH SYSTEM</h1>
+          </div>
+          <div className="menu-icon" onClick={toggleNav}>
+            <i className="fas fa-bars"></i>
+          </div>
+          <nav className={`main-nav ${isNavActive ? 'active' : ''}`}>
+            <ul>
+              <li><Link to="/">Home</Link></li>
+              <li><Link to="/order-test-kits">Order test kits</Link></li>
+              <li><Link to="/symptom-checker">Symptoms Checker</Link></li>
+              <li><Link to="/telemedicine">Telemedicine</Link></li>
+              {showAdminLink && (
+                <li className="admin-link">
+                  <Link to="/admin-login">Admin Login</Link>
+                </li>
+              )}
+            </ul>
+          </nav>
         </div>
-        <nav id="main-nav" className={menuOpen ? 'open' : ''}>
-          <ul id="menu-list">
-            <li><a href="#">Home</a></li>
-            <li><a href="#">Services</a></li>
-            <li><a href="#">Doctors</a></li>
-            <li><a href="#">Appointments</a></li>
-            <li><a href="#">Contact Us</a></li>
-            <li><a href="#">Login/Sign Up</a></li>
-          </ul>
-        </nav>
-        <div className="menu-icon" id="menu-icon" onClick={toggleMenu}>
-          <i className="fas fa-bars"></i>
-        </div>
-        <input type="text" placeholder="Search..." className="search-bar" />
       </div>
     </header>
   );

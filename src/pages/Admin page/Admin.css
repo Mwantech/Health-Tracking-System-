@@ -1,0 +1,175 @@
+/* Admin Page Container */
+.admin-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+  
+  /* Admin Page Heading */
+ .admin-container h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  /* Tabs Styling */
+ .admin-container .tabs-list {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+  
+ .admin-container .tabs-trigger {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #555;
+    background-color: #f0f0f0;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+ .admin-container .tabs-trigger:hover {
+    background-color: #e0e0e0;
+  }
+  
+ .admin-container .tabs-trigger.active {
+    background-color: #007bff;
+    color: #fff;
+  }
+  
+  /* Card Styling */
+ .admin-container .card {
+    background-color: #fff;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+.admin-container  .card-header {
+    margin-bottom: 1rem;
+  }
+  
+.admin-container  .card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #333;
+  }
+  
+.admin-container  .card-description {
+    color: #777;
+  }
+  
+  /* Table Styling */
+.admin-container  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+ .admin-container .table-header {
+    background-color: #f9f9f9;
+  }
+  
+.admin-container  .table-row {
+    border-bottom: 1px solid #eee;
+  }
+  
+ .admin-container .table-head,
+ .admin-container .table-cell {
+    padding: 0.75rem;
+    text-align: left;
+    font-size: 0.875rem;
+  }
+  
+ .admin-container .table-head {
+    font-weight: bold;
+    color: #555;
+  }
+  
+ .admin-container .table-cell {
+    color: #333;
+  }
+  
+  /* Buttons */
+ .admin-container button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+ .admin-container button:hover {
+    background-color: #0056b3;
+  }
+  
+ .admin-container button.outline {
+    background-color: transparent;
+    color: #007bff;
+    border: 2px solid #007bff;
+  }
+  
+ .admin-container button.outline:hover {
+    background-color: #007bff;
+    color: #fff;
+  }
+  
+ .admin-container .ml-2 {
+    margin-left: 0.5rem;
+  }
+  
+ .admin-container .mb-4 {
+    margin-bottom: 1rem;
+  }
+  
+ .admin-container .card-footer {
+    text-align: right;
+    margin-top: 1rem;
+  }
+  
+  /* Inputs */
+ .admin-container input {
+    padding: 0.5rem;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+  }
+  
+ .admin-container input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+  }
+  
+  /* Space utility classes */
+ .admin-container .space-y-4 > * + * {
+    margin-top: 1rem;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+   .admin-container .tabs-list {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+   .admin-container h1 {
+      font-size: 2rem;
+    }
+  
+   .admin-container .tabs-trigger {
+      width: 100%;
+      text-align: center;
+    }
+  }
+  

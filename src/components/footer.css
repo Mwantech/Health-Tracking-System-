@@ -1,0 +1,76 @@
+/* Footer */
+footer {
+    padding: 20px 0;
+    background-color: #0073e6;
+    color: #fff;
+    text-align: center;
+  }
+  
+  .footer-links a {
+    color: #fff;
+    margin: 0 10px;
+    text-decoration: none;
+  }
+  
+  .contact-info p {
+    margin: 5px 0;
+  }
+  
+  .social-media a {
+    color: #fff;
+    margin: 0 10px;
+    font-size: 20px;
+  }
+  
+  /* Media Queries */
+  @media screen and (max-width: 768px) {
+    #menu-icon {
+      display: block;
+    }
+  
+    #main-nav ul {
+      position: absolute;
+      top: 100%;
+      left: -100%;
+      width: 100%;
+      flex-direction: column;
+      background-color: #0073e6;
+    }
+  
+    #main-nav ul.active {
+      left: 0;
+    }
+  
+    #main-nav ul li {
+      margin: 10px 0;
+      text-align: center;
+    }
+    .search-bar {
+      width: 60%;
+      margin-top: 10px;
+    }
+  
+    .services-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .doctor-profile {
+      width: 100%;
+    }
+  }
+  
+  @media screen and (max-width: 480px) {
+    .banner-right h1 {
+      font-size: 24px;
+    }
+  
+    .banner-right p {
+      font-size: 16px;
+    }
+  
+    .btn-primary, .btn-secondary {
+      padding: 10px 20px;
+      font-size: 14px;
+    }
+  }
+  

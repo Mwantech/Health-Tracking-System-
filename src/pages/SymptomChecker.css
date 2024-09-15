@@ -1,106 +1,134 @@
-/* SymptomChecker.css */
-
-/* General container styling */
-.symptom-checker-container {
+/* General styling for the chat container */
+.chat-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 20px auto;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  max-width: 100%;
-  margin: 0 auto;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  background-color: #fff;
+  height: 80vh;
 }
 
-/* Chat box styling */
+/* Styling for the chat box where the messages appear */
 .chat-box {
-  flex: 1;
-  overflow-y: auto;
+  flex-grow: 1;
   padding: 10px;
-  background-color: #f9f9f9;
+  overflow-y: auto;
+  background-color: #fff;
   border-bottom: 1px solid #ddd;
+  scroll-behavior: smooth;
 }
 
-.chat-message {
-  margin: 10px 0;
+/* Styling for user messages */
+.user-msg {
+  background-color: #226efc;
+  color: white;
   padding: 10px;
   border-radius: 8px;
   max-width: 80%;
+  align-self: flex-end;
+  margin-bottom: 10px;
   word-wrap: break-word;
 }
 
-.user-message {
-  background-color: #007bff;
-  color: #fff;
-  align-self: flex-end;
-}
-
-.bot-message {
-  background-color: #e9ecef;
+/* Styling for bot messages */
+.bot-msg {
+  background-color: #e0e0e0;
   color: #333;
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 80%;
   align-self: flex-start;
+  margin-bottom: 10px;
+  word-wrap: break-word;
 }
 
-/* Input area styling */
-.input-area {
+/* Styling for buttons (Yes/No options) */
+.button-container {
   display: flex;
-  border-top: 1px solid #ddd;
+  justify-content: flex-start;
+  margin-top: 10px;
+}
+
+.response-button {
+  background-color: #008cba;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 10px;
+  font-size: 14px;
+}
+
+.response-button:hover {
+  background-color: #0072a3;
+}
+
+/* Input area styles */
+.input-box {
+  display: flex;
   padding: 10px;
   background-color: #fff;
 }
 
-.input-area input {
-  flex: 1;
+.input-box input {
+  flex-grow: 1;
   padding: 10px;
   border: 1px solid #ddd;
-  border-radius: 4px;
-  outline: none;
+  border-radius: 5px;
   font-size: 16px;
 }
 
-.input-area button {
-  margin-left: 10px;
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: #fff;
+.input-box button {
+  background-color: #46fd4c;
+  color: white;
   border: none;
-  border-radius: 4px;
-  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: 5px;
+  margin-left: 10px;
   cursor: pointer;
+  font-size: 16px;
 }
 
-.input-area button:hover {
-  background-color: #0056b3;
+.input-box button:hover {
+  background-color: #45a049;
 }
 
-/* Responsive design */
+/* Scrollbar styling */
+.chat-box::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-box::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.chat-box::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.chat-box::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Responsive styling for smaller screens */
 @media (max-width: 600px) {
-  .symptom-checker-container {
-      height: 90vh;
-      max-width: 100%;
+  .chat-container {
+    width: 95%;
+    height: 70vh;
   }
 
-  .input-area input {
-      font-size: 14px;
+  .input-box input, .input-box button {
+    font-size: 14px;
   }
 
-  .input-area button {
-      padding: 10px 15px;
-      font-size: 14px;
-  }
-}
-
-@media (max-height: 500px) {
-  .symptom-checker-container {
-      height: 100vh;
-  }
-
-  .input-area input {
-      padding: 8px;
-  }
-
-  .input-area button {
-      padding: 8px 12px;
+  .response-button {
+    padding: 8px 12px;
+    font-size: 12px;
   }
 }

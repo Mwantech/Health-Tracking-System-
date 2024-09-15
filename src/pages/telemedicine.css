@@ -1,0 +1,226 @@
+/* General Container */
+.container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+  
+  /* Heading */
+  h1 {
+    font-size: 1.875rem; /* 30px */
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+  
+  /* Card */
+  .card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 16px;
+    padding: 16px;
+  }
+  
+  /* Card Header */
+  .card-header {
+    margin-bottom: 16px;
+  }
+  
+  .card-header h2 {
+    font-size: 1.5rem; /* 24px */
+    font-weight: 700;
+  }
+  
+  .card-header h3 {
+    font-size: 1.25rem; /* 20px */
+    font-weight: 600;
+  }
+  
+  /* Card Content */
+  .card-content {
+    margin-bottom: 16px;
+  }
+  .card-content #health-issues{
+    background-color: #4A90E2;
+    margin-left: 9px;
+  }
+  .card-content #health-issues:hover{
+    background-color: #B6E6B6;
+  }
+  .card-footer #next{
+    background-color: #000;
+  }
+  .card-footer #selection{
+    background-color: #4A90E2;
+  }
+.card-footer #vdcall{
+  background-color: #4A90E2;
+}
+
+
+  /* Buttons */
+  button {
+    background-color: #4A90E2;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #357ABD;
+  }
+  
+  button:disabled {
+    background-color: #CCC;
+    cursor: not-allowed;
+  }
+  
+  button.m-1 {
+    margin: 4px;
+  }
+  
+  button.w-full {
+    width: 100%;
+  }
+  
+  /* Inputs */
+  input[type="date"], input[type="time"], input[type="text"], input[type="password"] {
+    width: 98%;
+    padding: 8px 12px;
+    margin: 4px 0;
+    border: 1px solid #CCC;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  
+  /* Label */
+  label {
+    font-size: 1rem;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+  }
+  
+  /* Radio Group */
+  .radio-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .radio-group .flex {
+    align-items: center;
+  }
+  
+  .radio-group-item {
+    margin-right: 8px;
+  }
+  
+  .radio-group label {
+    margin-bottom: 0;
+  }
+  
+  /* Alerts */
+  .alert {
+    background-color: #E6F7E6;
+    border: 1px solid #B6E6B6;
+    color: #3B803B;
+    padding: 12px;
+    border-radius: 4px;
+    margin-top: 16px;
+  }
+  
+  .alert-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  
+  .alert-description {
+    font-size: 0.875rem; /* 14px */
+  }
+  
+  /* Lists */
+  .list-decimal {
+    list-style-type: decimal;
+    padding-left: 20px;
+  }
+  
+  .list-inside {
+    padding-left: 0;
+  }
+  
+  /* Text */
+  .text-2xl {
+    font-size: 1.5rem; /* 24px */
+  }
+  
+  .text-xl {
+    font-size: 1.25rem; /* 20px */
+  }
+  
+  .font-bold {
+    font-weight: 700;
+  }
+  
+  .font-semibold {
+    font-weight: 600;
+  }
+  
+  .text-blue-500 {
+    color: #4A90E2;
+  }
+  
+  .text-lg {
+    font-size: 1.125rem; /* 18px */
+  }
+  
+  .text-blue-500:hover {
+    text-decoration: underline;
+  }
+  
+  .underline {
+    text-decoration: underline;
+  }
+  
+  .mt-4 {
+    margin-top: 16px;
+  }
+  .mt-4 #paymentbtn{
+    background-color: rgb(252, 24, 24);
+    color: #fff;
+    border-radius: 15px;
+
+  }
+  .mb-2 {
+    margin-bottom: 8px;
+  }
+  
+  .mb-4 {
+    margin-bottom: 16px;
+  }
+  
+  .mb-6 {
+    margin-bottom: 24px;
+  }
+  
+  .p-4 {
+    padding: 16px;
+  }
+  
+  .flex {
+    display: flex;
+  }
+  
+  .space-x-2 {
+    column-gap: 8px;
+  }
+  
+  /* Ensure form elements are responsive */
+  @media (max-width: 640px) {
+    .container {
+      padding: 8px;
+    }
+  }
+  

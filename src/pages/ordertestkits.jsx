@@ -60,7 +60,7 @@ const ReviewAndConfirm = ({ selectedKits, prevStep, nextStep }) => {
           </li>
         ))}
       </ul>
-      <button className="btn" onClick={prevStep}>Back</button>
+      <button id="back" className="btn" onClick={prevStep}>Back</button>
       <button className="btn" onClick={nextStep}>Proceed to Shipping</button>
     </div>
   );
@@ -81,7 +81,7 @@ const ShippingInformation = ({ shippingInfo, setShippingInfo, prevStep, nextStep
         <input name="phone" placeholder="Phone Number" onChange={handleChange} value={shippingInfo.phone} required />
         <input name="email" placeholder="Email" onChange={handleChange} value={shippingInfo.email} required />
       </form>
-      <button className="btn" onClick={prevStep}>Back</button>
+      <button id="back" className="btn" onClick={prevStep}>Back</button>
       <button className="btn" onClick={nextStep}>Proceed to Payment</button>
     </div>
   );
@@ -185,7 +185,7 @@ const PaymentOptions = ({ prevStep, nextStep, completeOrder }) => {
           />
         )}
       </div>
-      <button className="btn" onClick={prevStep}>Back</button>
+      <button id="back" className="btn" onClick={prevStep}>Back</button>
       <button className="btn" onClick={() => { completeOrder(); nextStep(); }}>Place Order</button>
     </div>
   );
