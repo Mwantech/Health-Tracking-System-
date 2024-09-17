@@ -74,7 +74,7 @@ body {
 }
 
 .btn-primary, .btn-secondary {
-  padding: 12px 25px;
+  padding: 12px 20px;
   border: none;
   border-radius: 25px;
   cursor: pointer;
@@ -278,6 +278,7 @@ body {
 
   .rhombus-image {
     transform: translateX(0);
+    clip-path: polygon(0% 50%, 25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%);
   }
 
   .banner-left:hover .rhombus-image {

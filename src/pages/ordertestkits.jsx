@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import './ordertestkits.css';
 
 // Test Kit Selection Component
 const TestKitSelection = ({ kits, selectedKits, setSelectedKits, nextStep }) => {
   const handleSelectKit = (kit) => {
-    const existingKit = selectedKits.find((k) => k.name === kit.name);
+    const existingKit = selectedKits.find((k) => k.id === kit.id);
     if (existingKit) {
       setSelectedKits((prev) =>
         prev.map((k) =>
-          k.name === kit.name ? { ...k, quantity: k.quantity + 1 } : k
+          k.id === kit.id ? { ...k, quantity: k.quantity + 1 } : k
         )
       );
     } else {
@@ -16,10 +17,10 @@ const TestKitSelection = ({ kits, selectedKits, setSelectedKits, nextStep }) => 
     }
   };
 
-  const handleQuantityChange = (kitName, quantity) => {
+  const handleQuantityChange = (kitId, quantity) => {
     setSelectedKits((prev) =>
       prev.map((k) =>
-        k.name === kitName ? { ...k, quantity: parseInt(quantity) || 1 } : k
+        k.id === kitId ? { ...k, quantity: parseInt(quantity) || 1 } : k
       )
     );
   };
@@ -28,15 +29,15 @@ const TestKitSelection = ({ kits, selectedKits, setSelectedKits, nextStep }) => 
     <div className="selection-container">
       <h2>Select Test Kits</h2>
       <ul className="kits-list">
-        {kits.map((kit, index) => (
-          <li key={index} className="kit-item">
-            <span className="kit-name" onClick={() => handleSelectKit(kit)}>{kit.name} - {kit.price}</span>
-            {selectedKits.some((k) => k.name === kit.name) && (
+        {kits.map((kit) => (
+          <li key={kit.id} className="kit-item">
+            <span className="kit-name" onClick={() => handleSelectKit(kit)}>{kit.name} - ${kit.price}</span>
+            {selectedKits.some((k) => k.id === kit.id) && (
               <input
                 type="number"
                 min="1"
-                value={selectedKits.find((k) => k.name === kit.name)?.quantity || 1}
-                onChange={(e) => handleQuantityChange(kit.name, e.target.value)}
+                value={selectedKits.find((k) => k.id === kit.id)?.quantity || 1}
+                onChange={(e) => handleQuantityChange(kit.id, e.target.value)}
                 className="quantity-input"
               />
             )}
@@ -54,9 +55,9 @@ const ReviewAndConfirm = ({ selectedKits, prevStep, nextStep }) => {
     <div className="review-container">
       <h2>Review and Confirm</h2>
       <ul className="review-list">
-        {selectedKits.map((kit, index) => (
-          <li key={index}>
-            {kit.name} - {kit.price} x {kit.quantity}
+        {selectedKits.map((kit) => (
+          <li key={kit.id}>
+            {kit.name} - ${kit.price} x {kit.quantity}
           </li>
         ))}
       </ul>
@@ -99,6 +100,16 @@ const PaymentOptions = ({ prevStep, nextStep, completeOrder }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setPaymentDetails({ ...paymentDetails, [name]: value });
+  };
+
+  const handleSubmit = () => {
+    const orderNumber = generateOrderNumber();
+    completeOrder(paymentMethod, paymentDetails, orderNumber);
+    nextStep();
+  };
+
+  const generateOrderNumber = () => {
+    return 'ORD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
   };
 
   return (
@@ -186,7 +197,7 @@ const PaymentOptions = ({ prevStep, nextStep, completeOrder }) => {
         )}
       </div>
       <button id="back" className="btn" onClick={prevStep}>Back</button>
-      <button className="btn" onClick={() => { completeOrder(); nextStep(); }}>Place Order</button>
+      <button className="btn" onClick={handleSubmit}>Place Order</button>
     </div>
   );
 };
@@ -198,7 +209,7 @@ const OrderConfirmation = ({ orderDetails }) => {
       <h2>Order Confirmation</h2>
       <p>Thank you for your order!</p>
       <p>Order Number: {orderDetails.orderNumber}</p>
-      <p>Estimated Delivery: {orderDetails.estimatedDelivery}</p>
+      <p>Estimated Delivery: 3-5 business days</p>
     </div>
   );
 };
@@ -206,27 +217,42 @@ const OrderConfirmation = ({ orderDetails }) => {
 // Checkout Steps Component
 const CheckoutSteps = () => {
   const [step, setStep] = useState(1);
+  const [kits, setKits] = useState([]);
   const [selectedKits, setSelectedKits] = useState([]);
   const [shippingInfo, setShippingInfo] = useState({ address: '', phone: '', email: '' });
   const [orderDetails, setOrderDetails] = useState({});
 
+  useEffect(() => {
+    fetchTestKits();
+  }, []);
+
+  const fetchTestKits = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/api/testkits');
+      setKits(response.data);
+    } catch (error) {
+      console.error('Error fetching test kits:', error);
+    }
+  };
+
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
-  const kits = [
-    { name: 'COVID-19 Test Kit', price: '$30' },
-    { name: 'Blood Test Kit', price: '$25' },
-    { name: 'DNA Test Kit', price: '$50' },
-    // Add more kits here
-  ];
-
-  const completeOrder = () => {
-    const orderNumber = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
-    setOrderDetails({
-      orderNumber,
-      estimatedDelivery: '3-5 business days'
-    });
+  const completeOrder = async (paymentMethod, paymentDetails, orderNumber) => {
+    try {
+      const response = await axios.post('http://localhost:3001/api/orders', {
+        selectedKits,
+        shippingInfo,
+        paymentMethod,
+        paymentDetails,
+        orderNumber
+      });
+      setOrderDetails(response.data);
+    } catch (error) {
+      console.error('Error placing order:', error);
+    }
   };
+  
 
   switch (step) {
     case 1:
