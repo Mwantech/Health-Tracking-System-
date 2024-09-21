@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './AdminLogin.css'; // Import the CSS file
+import './AdminLogin.css';
 
 const AdminLogin = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [userType, setUserType] = useState('admin');
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (username === 'admin' && password === 'password') {
-      onLogin();
+    if (userType === 'admin' && username === 'admin' && password === 'password') {
+      onLogin('admin', 'admin123');
       navigate('/admin');
+    } else if (userType === 'doctor' && username === 'doctor' && password === 'doctorpass') {
+      onLogin('doctor', 'doctor123');
+      navigate('/doctor');
     } else {
       setError('Invalid credentials. Please try again.');
     }
@@ -22,10 +26,24 @@ const AdminLogin = ({ onLogin }) => {
     <div className="adminlogin-container">
       <div className="card">
         <div className="card-header">
-          <h1 className="card-title">Admin Login</h1>
+          <h1 className="card-title">{userType === 'admin' ? 'Admin' : 'Doctor'} Login</h1>
         </div>
         <div className="card-content">
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="userType" className="block text-sm font-medium text-gray-700">
+                Login As
+              </label>
+              <select
+                id="userType"
+                className="input"
+                value={userType}
+                onChange={(e) => setUserType(e.target.value)}
+              >
+                <option value="admin">Admin</option>
+                <option value="doctor">Doctor</option>
+              </select>
+            </div>
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700">
                 Username

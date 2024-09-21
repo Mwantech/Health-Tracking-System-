@@ -348,7 +348,7 @@ const AdminPage = () => {
           type="number"
           placeholder="Price"
           value={newTestKit.price}
-          onChange={(e) => setNewTestKit({...newTestKit, price: e.target.value})}
+          onChange={(e) => setNewTestKit({...newTestKit, price: parseFloat(e.target.value)})}
         />
         <button type="submit">Add Test Kit</button>
       </form>

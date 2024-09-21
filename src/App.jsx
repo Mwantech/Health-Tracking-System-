@@ -9,23 +9,23 @@ import Symptomchecker from './pages/SymptomChecker';
 import Telemedicine from './pages/Telemedicine';
 import AdminPage from './pages/Admin page/Admin';
 import AdminLogin from './components/AdminLogin';
+import DoctorsPanelPage from './pages/Admin page/DoctorsPanelPage';
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userType, setUserType] = useState('');
+  const [userId, setUserId] = useState('');
 
-  const handleLogin = () => {
+  const handleLogin = (type, id) => {
     setIsAuthenticated(true);
+    setUserType(type);
+    setUserId(id);
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
-  };
-
-  const ProtectedRoute = ({ children }) => {
-    if (!isAuthenticated) {
-      return <Navigate to="/admin-login" replace />;
-    }
-    return children;
+    setUserType('');
+    setUserId('');
   };
 
   return (
@@ -41,11 +41,11 @@ const App = () => {
           <Route path="/admin-login" element={<AdminLogin onLogin={handleLogin} />} />
           <Route 
             path="/admin" 
-            element={
-              <ProtectedRoute>
-                <AdminPage />
-              </ProtectedRoute>
-            } 
+            element={isAuthenticated && userType === 'admin' ? <AdminPage /> : <Navigate to="/admin-login" />} 
+          />
+          <Route 
+            path="/doctor" 
+            element={isAuthenticated && userType === 'doctor' ? <DoctorsPanelPage doctorId={userId} /> : <Navigate to="/admin-login" />} 
           />
         </Routes>
 

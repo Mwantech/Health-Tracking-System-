@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import './telemedicine.css'; // Ensure this file is in the same directory or adjust the path as needed
-import VideoCall from './videoroom';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
+import './telemedicine.css';
 
 const TelemedicineAppointment = () => {
   const [step, setStep] = useState(1);
@@ -9,17 +10,27 @@ const TelemedicineAppointment = () => {
   const [appointmentDate, setAppointmentDate] = useState('');
   const [appointmentTime, setAppointmentTime] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentDetails, setPaymentDetails] = useState('');
   const [paymentStatus, setPaymentStatus] = useState(false);
   const [roomCode, setRoomCode] = useState('');
-  const [showVideoCall, setShowVideoCall] = useState(false);
+  const [email, setEmail] = useState('');
+  const [patientName, setPatientName] = useState('');
+  const [doctors, setDoctors] = useState([]);
 
   const healthIssues = ['Common Cold', 'Allergies', 'Skin Conditions', 'Mental Health', 'Chronic Disease Management'];
-  
-  const doctors = [
-    { id: 1, name: 'Dr. Smith', speciality: 'General Practice', experience: '10 years', fee: 100 },
-    { id: 2, name: 'Dr. Johnson', speciality: 'Dermatology', experience: '15 years', fee: 150 },
-    { id: 3, name: 'Dr. Williams', speciality: 'Psychiatry', experience: '12 years', fee: 200 },
-  ];
+
+  useEffect(() => {
+    fetchDoctors();
+  }, []);
+
+  const fetchDoctors = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/api/doctors');
+      setDoctors(response.data);
+    } catch (error) {
+      console.error('Error fetching doctors:', error);
+    }
+  };
 
   const handleIssueSelection = (issue) => {
     setSelectedIssues(prev => 
@@ -41,216 +52,215 @@ const TelemedicineAppointment = () => {
 
   const handlePaymentMethodSelection = (method) => {
     setPaymentMethod(method);
+    setPaymentDetails('');
   };
 
-  const handlePayment = () => {
-    // Simulate payment processing
-    setTimeout(() => {
-      setPaymentStatus(true);
-      const generatedRoomCode = Math.random().toString(36).substring(7).toUpperCase();
-      setRoomCode(generatedRoomCode);
-      setStep(5);
-    }, 2000);
+  const handlePaymentDetailsChange = (details) => {
+    setPaymentDetails(details);
   };
 
-  const calculateTotalFee = () => {
-    const baseFee = selectedDoctor ? selectedDoctor.fee : 0;
-    const additionalCharges = 20; // Example additional charge
-    return baseFee + additionalCharges;
-  };
+  const handlePayment = async () => {
+    try {
+      const response = await axios.post('http://localhost:3001/api/appointments', {
+        issues: selectedIssues,
+        doctorId: selectedDoctor.id,
+        date: appointmentDate,
+        time: appointmentTime,
+        email: email,
+        patientName: patientName,
+        paymentMethod: paymentMethod,
+        paymentDetails: paymentDetails
+      });
 
-  const startVideoCall = () => {
-    setShowVideoCall(true);
+      if (response.data.success) {
+        setPaymentStatus(true);
+        setRoomCode(response.data.roomCode);
+        setStep(5);
+      } else {
+        alert('Failed to create appointment. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error creating appointment:', error);
+      alert('An error occurred. Please try again.');
+    }
   };
 
   const renderStep = () => {
-    if (showVideoCall) {
-      return <VideoCall roomCode={roomCode} />;
-    }
-
     switch(step) {
       case 1:
         return (
-          <div className="card">
-            <div className="card-header">
-              <h2 className="text-2xl font-bold">Select Health Issues</h2>
-            </div>
-            <div className="card-content">
-              {healthIssues.map(issue => (
-                <button id="health-issues"
-                  key={issue} 
-                  onClick={() => handleIssueSelection(issue)}
-                  className={`button ${selectedIssues.includes(issue) ? 'default' : 'outline'}`}
-                >
-                  {issue}
-                </button>
-              ))}
-            </div>
-            <div className="card-footer">
-              <button id='next'
-                onClick={() => setStep(2)} 
-                disabled={selectedIssues.length === 0}
-                className="button"
+          <div>
+            <h2>Select Health Issues</h2>
+            {healthIssues.map(issue => (
+              <button 
+                key={issue} 
+                onClick={() => handleIssueSelection(issue)}
               >
-                Next
+                {issue}
               </button>
-            </div>
+            ))}
+            <button
+              onClick={() => setStep(2)} 
+              disabled={selectedIssues.length === 0}
+            >
+              Next
+            </button>
           </div>
         );
       case 2:
         return (
-          <div className="card">
-            <div className="card-header">
-              <h2 className="text-2xl font-bold">Select a Doctor</h2>
-            </div>
-            <div className="card-content">
-              {doctors.map(doctor => (
-                <div key={doctor.id} className="card mb-4">
-                  <div className="card-header">
-                    <h3 className="text-xl font-semibold">{doctor.name}</h3>
-                  </div>
-                  <div className="card-content">
-                    <p>Speciality: {doctor.speciality}</p>
-                    <p>Experience: {doctor.experience}</p>
-                    <p>Fee: ${doctor.fee}</p>
-                  </div>
-                  <div className="card-footer">
-                    <button id='selection' onClick={() => handleDoctorSelection(doctor)} className="button">
-                      Select
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="card-footer">
-              <button id='next'
-                onClick={() => setStep(3)} 
-                disabled={!selectedDoctor}
-                className="button"
-              >
-                Next
-              </button>
-            </div>
+          <div>
+            <h2>Select a Doctor</h2>
+            {doctors.map(doctor => (
+              <div key={doctor.id}>
+                <h3>{doctor.name}</h3>
+                <p>Specialization: {doctor.specialization}</p>
+                <p>Contact: {doctor.contact}</p>
+                <p>Availability: {doctor.availability}</p>
+                <p>Price: ${doctor.price}</p>
+                <button onClick={() => handleDoctorSelection(doctor)}>
+                  Select
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() => setStep(3)} 
+              disabled={!selectedDoctor}
+            >
+              Next
+            </button>
           </div>
         );
       case 3:
         return (
-          <div className="card">
-            <div className="card-header">
-              <h2 className="text-2xl font-bold">Schedule Appointment</h2>
+          <div>
+            <h2>Schedule Appointment</h2>
+            <p>Doctor: {selectedDoctor.name}</p>
+            <div>
+              <label htmlFor="date">Select Date</label>
+              <input 
+                id="date" 
+                type="date" 
+                onChange={(e) => handleDateSelection(e.target.value)}
+              />
             </div>
-            <div className="card-content">
-              <div className="mb-4">
-                <label htmlFor="date" className="label">Select Date</label>
-                <input 
-                  id="date" 
-                  type="date" 
-                  onChange={(e) => handleDateSelection(e.target.value)}
-                  className="input"
-                />
-              </div>
-              <div>
-                <label htmlFor="time" className="label">Select Time</label>
-                <input 
-                  id="time" 
-                  type="time" 
-                  onChange={(e) => handleTimeSelection(e.target.value)}
-                  className="input"
-                />
-              </div>
+            <div>
+              <label htmlFor="time">Select Time</label>
+              <input 
+                id="time" 
+                type="time" 
+                onChange={(e) => handleTimeSelection(e.target.value)}
+              />
             </div>
-            <div className="card-footer">
-              <button id='next'
-                onClick={() => setStep(4)} 
-                disabled={!appointmentDate || !appointmentTime}
-                className="button"
-              >
-                Next
-              </button>
-            </div>
+            <button
+              onClick={() => setStep(4)} 
+              disabled={!appointmentDate || !appointmentTime}
+            >
+              Next
+            </button>
           </div>
         );
       case 4:
         return (
-          <div className="card">
-            <div className="card-header">
-              <h2 className="text-2xl font-bold">Payment</h2>
+          <div>
+            <h2>Payment</h2>
+            <p>Doctor: {selectedDoctor.name}</p>
+            <p>Specialization: {selectedDoctor.specialization}</p>
+            <p>Date: {appointmentDate}</p>
+            <p>Time: {appointmentTime}</p>
+            <p>Total: ${selectedDoctor.price}</p>
+            
+            <div>
+              <label htmlFor="patientName">Patient Name</label>
+              <input 
+                type="text" 
+                id="patientName"
+                value={patientName} 
+                onChange={(e) => setPatientName(e.target.value)} 
+                placeholder="Enter patient name"
+                required
+              />
             </div>
-            <div className="card-content">
-              <p>Doctor's Fee: ${selectedDoctor.fee}</p>
-              <p>Additional Charges: $20</p>
-              <p className="font-bold">Total: ${calculateTotalFee()}</p>
-              
-              <div className="mt-4">
-                <label className="label">Select Payment Method</label>
-                <div className="radio-group" onChange={(e) => handlePaymentMethodSelection(e.target.value)}>
-                  <div className="flex items-center space-x-2">
-                    <input type="radio" value="paypal" id="paypal" name="payment-method" className="radio-group-item" />
-                    <label htmlFor="paypal" className="label">PayPal</label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <input type="radio" value="card" id="card" name="payment-method" className="radio-group-item" />
-                    <label htmlFor="card" className="label">Credit/Debit Card</label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <input type="radio" value="mpesa" id="mpesa" name="payment-method" className="radio-group-item" />
-                    <label htmlFor="mpesa" className="label">M-Pesa</label>
-                  </div>
-                </div>
+
+            <div>
+              <label htmlFor="email">Email Address</label>
+              <input 
+                type="email" 
+                id="email"
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+
+            <div>
+              <p>Select Payment Method</p>
+              <label>
+                <input 
+                  type="radio" 
+                  value="paypal" 
+                  checked={paymentMethod === 'paypal'} 
+                  onChange={() => handlePaymentMethodSelection('paypal')} 
+                />
+                PayPal
+              </label>
+              <label>
+                <input 
+                  type="radio" 
+                  value="card" 
+                  checked={paymentMethod === 'card'} 
+                  onChange={() => handlePaymentMethodSelection('card')} 
+                />
+                Credit/Debit Card
+              </label>
+              <label>
+                <input 
+                  type="radio" 
+                  value="mpesa" 
+                  checked={paymentMethod === 'mpesa'} 
+                  onChange={() => handlePaymentMethodSelection('mpesa')} 
+                />
+                M-Pesa
+              </label>
+            </div>
+            
+            {paymentMethod && (
+              <div>
+                <label htmlFor="paymentDetails">
+                  {paymentMethod === 'paypal' ? 'PayPal Email' : 
+                   paymentMethod === 'card' ? 'Card Number' : 
+                   'M-Pesa Number'}
+                </label>
+                <input 
+                  type="text" 
+                  id="paymentDetails"
+                  value={paymentDetails}
+                  onChange={(e) => handlePaymentDetailsChange(e.target.value)}
+                  placeholder={`Enter ${paymentMethod} details`}
+                  required
+                />
               </div>
-              
-              {paymentMethod && (
-                <div className="mt-4">
-                  {paymentMethod === 'paypal' && (
-                    <>
-                    <input placeholder="PayPal Email" className="input mb-2" />
-                    <button id='paymentbtn' onClick={handlePayment} className="button w-full">
-                      Pay with PayPal
-                    </button>
-                    </>
-                  )}
-                  {paymentMethod === 'card' && (
-                    <>
-                      <input placeholder="Card Number" className="input mb-2" />
-                      <div className="flex space-x-2 mb-2">
-                        <input placeholder="MM/YY" className="input w-1/2" />
-                        <input placeholder="CVV" className="input w-1/2" />
-                      </div>
-                      <button id='paymentbtn' onClick={handlePayment} className="button w-full">
-                        Pay with Card
-                      </button>
-                    </>
-                  )}
-                  {paymentMethod === 'mpesa' && (
-                    <>
-                      <input placeholder="M-Pesa Phone Number" className="input mb-2" />
-                      <button id='paymentbtn' onClick={handlePayment} className="button w-full">
-                        Pay with M-Pesa
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
+            )}
+            
+            <button onClick={handlePayment} disabled={!paymentDetails}>
+              Pay ${selectedDoctor.price}
+            </button>
           </div>
         );
       case 5:
         return (
-          <div className="card">
-            <div className="card-header">
-              <h2 className="text-2xl font-bold">Payment Successful!</h2>
-            </div>
-            <div className="card-content">
-              <p>Your appointment is confirmed with Dr. {selectedDoctor.name}.</p>
-              <p>Date: {appointmentDate}</p>
-              <p>Time: {appointmentTime}</p>
-              <p>Room Code: {roomCode}</p>
-            </div>
-            <div className="card-footer">
-              <button id='vdcall' onClick={startVideoCall} className="button">
-                Start Video Call
-              </button>
-            </div>
+          <div>
+            <h2>Payment Successful!</h2>
+            <p>Your appointment is confirmed with Dr. {selectedDoctor.names}.</p>
+            <p>Specialization: {selectedDoctor.specialization}</p>
+            <p>Date: {appointmentDate}</p>
+            <p>Time: {appointmentTime}</p>
+            <p>Room Code: {roomCode}</p>
+            <p>A confirmation email has been sent to {email}.</p>
+            <Link to={`/videoroom/${roomCode}`}>
+              Start Video Call
+            </Link>
           </div>
         );
       default:
@@ -260,7 +270,7 @@ const TelemedicineAppointment = () => {
 
   return (
     <div className="telemedicine-appointment">
-      <h1 className="text-3xl font-bold">Telemedicine Appointment</h1>
+      <h1>Telemedicine Appointment</h1>
       {renderStep()}
     </div>
   );
