@@ -230,6 +230,12 @@ const AdminPage = () => {
           value={newDoctor.availability}
           onChange={(e) => setNewDoctor({...newDoctor, availability: e.target.value})}
         />
+        <input 
+        type="text" 
+        placeholder="Price" 
+        value={newDoctor.price} 
+        onChange={(e) => setNewDoctor({...newDoctor, price: e.target.value})}
+        />
         <button type="submit">Add Doctor</button>
       </form>
       <table>
@@ -239,6 +245,7 @@ const AdminPage = () => {
             <th>Specialization</th>
             <th>Contact</th>
             <th>Availability</th>
+            <th>Price</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -248,6 +255,7 @@ const AdminPage = () => {
               <td>{doctor.name}</td>
               <td>{doctor.specialization}</td>
               <td>{doctor.contact}</td>
+              <td>{doctor.price}</td>
               <td>{doctor.availability}</td>
               <td>
                 <button onClick={() => deleteDoctor(doctor.id)}>Delete</button>
@@ -386,11 +394,11 @@ const AdminPage = () => {
         ))}
       </div>
       <div className="tabs">
-        <button onClick={() => setActiveTab("orders")}>Orders</button>
-        <button onClick={() => setActiveTab("doctors")}>Doctors</button>
-        <button onClick={() => setActiveTab("healthIssues")}>Health Issues</button>
-        <button onClick={() => setActiveTab("telemedicine")}>Telemedicine Pricing</button>
-        <button onClick={() => setActiveTab("testKits")}>Test Kits</button>
+        <button id="tabsbtn" onClick={() => setActiveTab("orders")}>Orders</button>
+        <button id="tabsbtn" onClick={() => setActiveTab("doctors")}>Doctors</button>
+        <button id="tabsbtn" onClick={() => setActiveTab("healthIssues")}>Health Issues</button>
+        <button id="tabsbtn" onClick={() => setActiveTab("telemedicine")}>Telemedicine Pricing</button>
+        <button id="tabsbtn" onClick={() => setActiveTab("testKits")}>Test Kits</button>
       </div>
       {activeTab === "orders" && renderOrdersManagement()}
       {activeTab === "doctors" && renderDoctorManagement()}

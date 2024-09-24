@@ -89,22 +89,26 @@ const TelemedicineAppointment = () => {
     switch(step) {
       case 1:
         return (
-          <div>
+          <div className='card'>
+          <div className='card-content'>
+            <div className='card-header'>
             <h2>Select Health Issues</h2>
+            </div>
             {healthIssues.map(issue => (
-              <button 
+              <button id="health-issues"
                 key={issue} 
                 onClick={() => handleIssueSelection(issue)}
               >
                 {issue}
               </button>
             ))}
-            <button
+            <button id="next"
               onClick={() => setStep(2)} 
               disabled={selectedIssues.length === 0}
             >
               Next
             </button>
+          </div>
           </div>
         );
       case 2:
@@ -118,12 +122,12 @@ const TelemedicineAppointment = () => {
                 <p>Contact: {doctor.contact}</p>
                 <p>Availability: {doctor.availability}</p>
                 <p>Price: ${doctor.price}</p>
-                <button onClick={() => handleDoctorSelection(doctor)}>
+                <button id="selection" onClick={() => handleDoctorSelection(doctor)}>
                   Select
                 </button>
               </div>
             ))}
-            <button
+            <button id='next'
               onClick={() => setStep(3)} 
               disabled={!selectedDoctor}
             >
@@ -152,7 +156,7 @@ const TelemedicineAppointment = () => {
                 onChange={(e) => handleTimeSelection(e.target.value)}
               />
             </div>
-            <button
+            <button id='next'
               onClick={() => setStep(4)} 
               disabled={!appointmentDate || !appointmentTime}
             >
@@ -243,7 +247,7 @@ const TelemedicineAppointment = () => {
               </div>
             )}
             
-            <button onClick={handlePayment} disabled={!paymentDetails}>
+            <button id='pay' onClick={handlePayment} disabled={!paymentDetails}>
               Pay ${selectedDoctor.price}
             </button>
           </div>
