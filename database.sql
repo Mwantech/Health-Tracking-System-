@@ -72,3 +72,52 @@ INSERT INTO telemedicine_pricing (base_fee, additional_fee) VALUES (50.00, 1.00)
 
 -- Add status column to orders table if it doesn't exist
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Pending';
+
+-- Check if the admins table exists
+SHOW TABLES LIKE 'admins';
+
+-- If it doesn't exist, create it
+CREATE TABLE IF NOT EXISTS admins (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insert a test admin user (if not exists)
+-- The password here is 'testpassword'
+INSERT IGNORE INTO admins (username, password) 
+VALUES ('testadmin', '$2b$10$5dwsS5snIRlKu8ka5r7z0eoRyQVpMC4U5PfBkd0hYle/2/xhbf6ba');
+
+-- Verify the inserted data
+SELECT * FROM admins;
+
+
+-- Create Doctors table
+CREATE TABLE doctors (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  speciality VARCHAR(100) NOT NULL,
+  experience VARCHAR(50),
+  fee DECIMAL(10, 2) NOT NULL
+);
+
+-- Create Appointments table
+CREATE TABLE appointments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  doctor_id INT NOT NULL,
+  patient_name VARCHAR(100) NOT NULL,
+  user_email VARCHAR(100) NOT NULL,
+  appointment_date DATE NOT NULL,
+  appointment_time TIME NOT NULL,
+  room_code VARCHAR(10) NOT NULL,
+  issues JSON,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (doctor_id) REFERENCES doctors(id)
+);
+
+-- Insert sample doctors
+INSERT INTO doctors (name, speciality, experience, fee) VALUES
+('Dr. Smith', 'General Practice', '10 years', 100.00),
+('Dr. Johnson', 'Dermatology', '15 years', 150.00),
+('Dr. Williams', 'Psychiatry', '12 years', 200.00);

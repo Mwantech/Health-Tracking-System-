@@ -13,9 +13,9 @@ module.exports = (connection) => {
 
   // Add a new doctor
   router.post('/doctors', (req, res) => {
-    const { name, specialization, contact, availability } = req.body;
-    const query = 'INSERT INTO doctors (name, specialization, contact, availability) VALUES (?, ?, ?, ?)';
-    connection.query(query, [name, specialization, contact, availability], (error, result) => {
+    const { name, specialization, contact, availability, price} = req.body;
+    const query = 'INSERT INTO doctors (name, specialization, contact, availability, price) VALUES (?, ?, ?, ?, ?)';
+    connection.query(query, [name, specialization, contact, availability, price], (error, result) => {
       if (error) throw error;
       res.status(201).json({ id: result.insertId, message: 'Doctor added successfully' });
     });
@@ -24,9 +24,9 @@ module.exports = (connection) => {
   // Update a doctor
   router.put('/doctors/:id', (req, res) => {
     const { id } = req.params;
-    const { name, specialization, contact, availability } = req.body;
-    const query = 'UPDATE doctors SET name = ?, specialization = ?, contact = ?, availability = ? WHERE id = ?';
-    connection.query(query, [name, specialization, contact, availability, id], (error, result) => {
+    const { name, specialization, contact, availability, price} = req.body;
+    const query = 'UPDATE doctors SET name = ?, specialization = ?, contact = ?, availability = ?, price= ? WHERE id = ?';
+    connection.query(query, [name, specialization, contact, availability, price, id], (error, result) => {
       if (error) throw error;
       if (result.affectedRows === 0) {
         res.status(404).json({ message: 'Doctor not found' });
