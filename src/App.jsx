@@ -28,28 +28,43 @@ const App = () => {
     setUserId('');
   };
 
+  const renderWithHeaderFooter = (Component) => (
+    <>
+      <Header isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+      <Component />
+      <Footer />
+    </>
+  );
+
+  const renderWithoutHeader = (Component) => (
+    <>
+      <Component />
+      <Footer />
+    </>
+  );
+
   return (
     <Router>
       <div>
-        <Header isAuthenticated={isAuthenticated} onLogout={handleLogout} />
-
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/order-test-kits" element={<OrderTestKits />} />
-          <Route path="/Symptom-checker" element={<Symptomchecker />} />
-          <Route path="/Telemedicine" element={<Telemedicine />} />
-          <Route path="/admin-login" element={<AdminLogin onLogin={handleLogin} />} />
+          <Route path="/" element={renderWithHeaderFooter(HomePage)} />
+          <Route path="/order-test-kits" element={renderWithHeaderFooter(OrderTestKits)} />
+          <Route path="/Symptom-checker" element={renderWithHeaderFooter(Symptomchecker)} />
+          <Route path="/Telemedicine" element={renderWithHeaderFooter(Telemedicine)} />
+          <Route path="/admin-login" element={renderWithoutHeader(() => <AdminLogin onLogin={handleLogin} />)} />
           <Route 
             path="/admin" 
-            element={isAuthenticated && userType === 'admin' ? <AdminPage /> : <Navigate to="/admin-login" />} 
+            element={isAuthenticated && userType === 'admin' 
+              ? renderWithoutHeader(AdminPage) 
+              : <Navigate to="/admin-login" />} 
           />
           <Route 
             path="/doctor" 
-            element={isAuthenticated && userType === 'doctor' ? <DoctorsPanelPage doctorId={userId} /> : <Navigate to="/admin-login" />} 
+            element={isAuthenticated && userType === 'doctor' 
+              ? renderWithoutHeader(() => <DoctorsPanelPage doctorId={userId} />)
+              : <Navigate to="/admin-login" />} 
           />
         </Routes>
-
-        <Footer />
       </div>
     </Router>
   );

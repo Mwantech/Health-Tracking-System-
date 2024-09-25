@@ -1,78 +1,89 @@
 /* AdminLogin.css */
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html {
+  height: 100%;
+  font-family: Arial, sans-serif;
+}
+
 .adminlogin-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background-color: #f4f4f9;
-  }
-  
- .adminlogin-container .card {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    max-width: 400px;
-    width: 100%;
-  }
-  
- .adminlogin-container .card-header {
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
- .adminlogin-container .card-title {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #333;
-  }
-  
- .adminlogin-container .card-content {
-    margin-bottom: 20px;
-  }
-  
- .adminlogin-container .input {
-    width: 98%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
-    margin-top: 5px;
-  }
-  
- .adminlogin-container .input:focus {
-    outline: none;
-    border-color: #4a90e2;
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
-  }
-  
- .adminlogin-container .button {
-    width: 100%;
-    padding: 10px;
-    background-color: #4a90e2;
-    color: #fff;
-    font-size: 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-.adminlogin-container  .button:hover {
-    background-color: #357ab8;
-  }
-  
- .adminlogin-container .alert {
-    background-color: #ffe5e5;
-    color: #d9534f;
-    border-radius: 4px;
-    padding: 10px;
-    margin-bottom: 10px;
-    text-align: center;
-  }
-  
- .adminlogin-container .alert-description {
-    font-size: 0.875rem;
-  }
-  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px; /* Added padding to prevent edge touching on small screens */
+  background-color: #f4f4f9;
+}
+
+.adminlogin-container .card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-width: 400px;
+  width: 100%;
+}
+
+.adminlogin-container .card-header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.adminlogin-container .card-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.adminlogin-container .card-content {
+  margin-bottom: 20px;
+}
+
+.adminlogin-container .input {
+  width: 98%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  margin-top: 5px;
+}
+
+.adminlogin-container .input:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+.adminlogin-container .button {
+  width: 100%;
+  padding: 10px;
+  background-color: #4a90e2;
+  color: #fff;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.adminlogin-container .button:hover {
+  background-color: #357ab8;
+}
+
+.adminlogin-container .alert {
+  background-color: #ffe5e5;
+  color: #d9534f;
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.adminlogin-container .alert-description {
+  font-size: 0.875rem;
+}
