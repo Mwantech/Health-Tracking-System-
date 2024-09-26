@@ -13,7 +13,7 @@ const admins = [
 const superadmins = ['mwantech', 'john smith'];
 
 // JWT secret (should be stored in environment variables)
-const JWT_SECRET = process.env.JWT_SECRET || '80b4c49e9640788db141db4f101c7caacc61be284f78c0120b0e918936c6d50288323416090bd8bec1a0e6ecc5b32c0aead810b65418d1efd5903c11a76f887e';
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 
 // Middleware to verify admin token
 const verifyAdminToken = (req, res, next) => {
