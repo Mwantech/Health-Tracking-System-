@@ -1,6 +1,7 @@
 // src/pages/HomePage.jsx
 import React from 'react';
 import banner from '../assets/bg1.jpeg';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 import './HomePage.css';
 
 const HomePage = () => {
