@@ -19,6 +19,7 @@
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.11.3",
     "nodemailer": "^6.9.15",
+    "sequelize": "^6.37.3",
     "socket.io": "^4.7.5"
   }
 }
