@@ -29,12 +29,25 @@ const AdminManagement = () => {
   const authenticateAdmin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/admins/authenticate', authAdmin);
-      if (response.data.token) {
-        setToken(response.data.token);
+      const response = await fetch('http://localhost:5000/api/admins/authenticate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(authAdmin),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (data.token) {
+        setToken(data.token);
         setIsAuthenticated(true);
-        setCanManageAdmins(response.data.canManageAdmins);
-        if (!response.data.canManageAdmins) {
+        setCanManageAdmins(data.canManageAdmins);
+        if (!data.canManageAdmins) {
           alert('You do not have permission to manage admins.');
         }
       } else {
@@ -42,7 +55,7 @@ const AdminManagement = () => {
       }
     } catch (error) {
       console.error('Error authenticating admin:', error);
-      alert('Authentication failed. Please try again.');
+      alert(`Authentication failed: ${error.message}`);
     }
   };
 
