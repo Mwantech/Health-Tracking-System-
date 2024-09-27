@@ -169,7 +169,7 @@ const AdminPage = () => {
   };
   // ... (keep all existing render functions)
   const renderOrdersManagement = () => (
-    <div className="card">
+    <div className="admin-card">
       <h2>Orders Management</h2>
       <table>
         <thead>
@@ -208,7 +208,7 @@ const AdminPage = () => {
 
  // Modify the existing renderDoctorManagement function to include password field
  const renderDoctorManagement = () => (
-    <div className="card">
+    <div className="admin-card">
       <h2>Doctor Management</h2>
       <form onSubmit={addDoctor}>
         <input
@@ -279,7 +279,7 @@ const AdminPage = () => {
   );
 
   const renderHealthIssueManagement = () => (
-    <div className="card">
+    <div className="admin-card">
       <h2>Health Issue Management</h2>
       <form onSubmit={addHealthIssue}>
         <input
@@ -328,7 +328,7 @@ const AdminPage = () => {
   );
 
   const renderTelemedicinePricing = () => (
-    <div className="card">
+    <div className="admin-card">
       <h2>Telemedicine Pricing</h2>
       <form onSubmit={updateTelemedicinePricing}>
         <div>
@@ -353,7 +353,7 @@ const AdminPage = () => {
   );
 
   const renderTestKitManagement = () => (
-    <div className="card">
+    <div className="admin-card">
       <h2>Test Kit Management</h2>
       <form onSubmit={addTestKit}>
         <input

@@ -45,7 +45,7 @@ const App = () => {
 
   return (
     <Router>
-      <div>
+      <div className="app-container">
         <Routes>
           <Route path="/" element={renderWithHeaderFooter(HomePage)} />
           <Route path="/order-test-kits" element={renderWithHeaderFooter(OrderTestKits)} />

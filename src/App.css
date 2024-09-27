@@ -1,9 +1,10 @@
-/* Global Styles */
-body {
-  font-family: 'Arial', sans-serif;
+html, body, #root, .app-container {
+  height: 100%;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-  line-height: 1.6;
-  color: #333;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
 }
