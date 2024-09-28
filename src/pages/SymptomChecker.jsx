@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import FuzzySet from 'fuzzyset';
+import { ThumbsUp, ThumbsDown, Loader } from 'lucide-react';
 import './SymptomChecker.css';
 
 const SymptomChecker = () => {
@@ -8,25 +9,29 @@ const SymptomChecker = () => {
   const [intents, setIntents] = useState([]);
   const [fuzzyMatcher, setFuzzyMatcher] = useState(null);
   const [isFirstMessage, setIsFirstMessage] = useState(true);
+  const [conversationContext, setConversationContext] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const chatBoxRef = useRef(null);
 
   useEffect(() => {
-    // Load intents from the external intents.json file
     fetch('intents/intents.json')
       .then(response => response.json())
       .then(data => {
         setIntents(data);
-        // Initialize fuzzy matcher with all patterns
         const allPatterns = data.flatMap(intent => intent.patterns);
         setFuzzyMatcher(FuzzySet(allPatterns));
       })
       .catch(error => console.error('Error loading intents:', error));
 
-    // Initial welcome message
-    setMessages([{ className: "bot-msg", message: "Hello, I'm Novas, your AI symptom checker. How can I help you today?" }]);
+    const greetings = [
+      "Hello, I'm Novas, your AI symptom checker. How can I help you today?",
+      "Hi there! I'm Novas, ready to assist with your health concerns. What brings you here?",
+      "Welcome! I'm Novas, your virtual health assistant. What symptoms are you experiencing?",
+    ];
+    const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+    setMessages([{ className: "bot-msg", message: randomGreeting }]);
   }, []);
 
-  // ... [other functions remain the same]
   const lemmatize = (word) => {
     const lemmatizedWords = {
       "running": "run", "ran": "run", "eaten": "eat", "ate": "eat",
@@ -51,35 +56,53 @@ const SymptomChecker = () => {
     return words.filter(word => !stopwords.includes(word)).map(lemmatize);
   };
 
-  const findMatchingIntent = (userInput) => {
-    const keyPhrases = extractKeyPhrases(userInput);
-    let bestMatch = null;
-    let highestMatchCount = 0;
+  const synonyms = {
+    "headache": ["migraine", "head pain"],
+    "fever": ["high temperature", "elevated temperature"],
+    "cough": ["hacking", "wheezing"],
+    // Add more synonyms here
+  };
 
-    // Use fuzzy matching to find the best matching pattern
-    const fuzzyMatches = fuzzyMatcher.get(userInput.toLowerCase(), null, 0.6);
-    if (fuzzyMatches && fuzzyMatches.length > 0) {
-      const [score, matchedPattern] = fuzzyMatches[0];
-      bestMatch = intents.find(intent => intent.patterns.includes(matchedPattern));
-    }
+const findMatchingIntent = (userInput) => {
+  const keyPhrases = extractKeyPhrases(userInput);
+  let bestMatch = null;
+  let highestScore = 0;
 
-    // If no fuzzy match, fall back to key phrase matching
-    if (!bestMatch) {
-      for (const intent of intents) {
-        for (const pattern of intent.patterns) {
-          const patternWords = pattern.toLowerCase().split(/\W+/).map(lemmatize);
-          const matchCount = patternWords.filter(word => keyPhrases.includes(word)).length;
+  // Expand key phrases with synonyms
+  const expandedKeyPhrases = keyPhrases.flatMap(phrase => 
+    [phrase, ...(synonyms[phrase] || [])]
+  );
 
-          if (matchCount > highestMatchCount) {
-            highestMatchCount = matchCount;
-            bestMatch = intent;
-          }
+  // Create a FuzzySet with all patterns
+  const allPatterns = intents.flatMap(intent => intent.patterns);
+  const fuzzyPatterns = FuzzySet(allPatterns);
+
+  // Try to match the entire user input
+  const fullInputMatch = fuzzyPatterns.get(userInput.toLowerCase(), null, 0.6);
+  if (fullInputMatch && fullInputMatch.length > 0) {
+    const [score, matchedPattern] = fullInputMatch[0];
+    bestMatch = intents.find(intent => intent.patterns.includes(matchedPattern));
+    highestScore = score;
+  }
+
+  // If no full match, try matching individual words or phrases
+  if (!bestMatch) {
+    for (const phrase of expandedKeyPhrases) {
+      const phraseMatches = fuzzyPatterns.get(phrase, null, 0.7);
+      if (phraseMatches && phraseMatches.length > 0) {
+        const [score, matchedPattern] = phraseMatches[0];
+        if (score > highestScore) {
+          bestMatch = intents.find(intent => intent.patterns.includes(matchedPattern));
+          highestScore = score;
         }
       }
     }
+  }
 
-    return bestMatch;
-  };
+  return bestMatch;
+};
+
+// ... (rest of the code remains the same)
 
   const saveUnrecognizedInput = (userInput) => {
     const unrecognizedData = {
@@ -162,44 +185,66 @@ const SymptomChecker = () => {
     setMessages(prevMessages => prevMessages.filter(msg => !msg.isFeedback));
   };
 
+  const handleUnrecognizedInput = (userInput) => {
+    const fuzzyMatches = fuzzyMatcher.get(userInput.toLowerCase(), [], 0.4);
+    if (fuzzyMatches.length > 0) {
+      const suggestions = fuzzyMatches.slice(0, 3).map(([score, match]) => match);
+      addChatMessage("bot-msg", `I'm not sure I understood that. Did you mean something like: ${suggestions.join(', ')}?`);
+    } else {
+      addChatMessage("bot-msg", "I apologize, but I'm not sure I fully understood your concern. Could you please rephrase or provide more details about your symptoms?");
+    }
+    saveUnrecognizedInput(userInput);
+  };
+
   const sendMessage = () => {
     if (userInput.trim() === "") return;
-
-    // Remove the initial greeting message if it's the user's first input
+  
     if (isFirstMessage) {
       setMessages([]);
       setIsFirstMessage(false);
     }
-
+  
     addChatMessage("user-msg", userInput);
-
-    const matchingIntent = findMatchingIntent(userInput);
-    if (matchingIntent) {
-      const botResponse = matchingIntent.responses[Math.floor(Math.random() * matchingIntent.responses.length)];
-      addChatMessage("bot-msg", botResponse);
-
-      if (matchingIntent.precaution) {
-        const precautions = matchingIntent.precaution.join("<br>");
-        addChatMessage("bot-msg", `<b>Recommended actions:</b><br>${precautions}`);
-      }
-
-      if (matchingIntent.askForMedicalCenters || matchingIntent.precaution) {
+    setIsLoading(true);
+  
+    setTimeout(() => {
+      const matchingIntent = findMatchingIntent(userInput);
+      if (matchingIntent) {
+        const botResponse = matchingIntent.responses[Math.floor(Math.random() * matchingIntent.responses.length)];
+        addChatMessage("bot-msg", botResponse);
+  
+        // Check if it's a greeting
+        if (matchingIntent.isGreeting) {
+          // For greetings, don't schedule follow-up, show caution, or ask for feedback
+          setIsLoading(false);
+          setUserInput("");
+          return;
+        }
+  
+        if (matchingIntent.precaution) {
+          const precautions = matchingIntent.precaution.join("<br>");
+          addChatMessage("bot-msg", `<b>Recommended actions:</b><br>${precautions}`);
+        }
+  
+        // Always display the option for nearby medical centers for non-greeting intents
         askForNearbyMedicalCenters();
+  
+        scheduleFollowUp();
+        askForFeedback();
+  
+        // Update conversation context
+        setConversationContext(prevContext => [...prevContext, matchingIntent.tag]);
+  
+        addChatMessage("bot-msg", "Remember, I'm an AI assistant and can't provide professional medical advice. If you're experiencing severe symptoms or have urgent concerns, please consult a healthcare professional or seek emergency services.");
+      } else {
+        handleUnrecognizedInput(userInput);
       }
-
-      scheduleFollowUp();
-      askForFeedback();
-    } else {
-      addChatMessage("bot-msg", "I apologize, but I'm not sure I fully understood your concern. Could you please rephrase or provide more details about your symptoms?");
-      saveUnrecognizedInput(userInput);
-    }
-
-    addChatMessage("bot-msg", "Remember, I'm an AI assistant and can't provide professional medical advice. If you're experiencing severe symptoms or have urgent concerns, please consult a healthcare professional or seek emergency services.");
-
-    setUserInput("");
+  
+      setIsLoading(false);
+      setUserInput("");
+    }, 1000); // Simulating a delay for the bot's response
   };
 
-  // ... [rest of the component code remains the same]
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
       sendMessage();
@@ -214,8 +259,8 @@ const SymptomChecker = () => {
             <div key={index} className="button-container">
               {msg.isFeedback ? (
                 <>
-                  <button className="response-button" onClick={() => handleFeedback(true)}>Yes, it was helpful</button>
-                  <button className="response-button" onClick={() => handleFeedback(false)}>No, I need more help</button>
+                  <button className="response-button" onClick={() => handleFeedback(true)}><ThumbsUp size={20} /></button>
+                  <button className="response-button" onClick={() => handleFeedback(false)}><ThumbsDown size={20} /></button>
                 </>
               ) : (
                 <>
@@ -228,6 +273,7 @@ const SymptomChecker = () => {
             <div key={index} className={msg.className} dangerouslySetInnerHTML={{ __html: msg.message }} />
           )
         ))}
+        {isLoading && <div className="loading-indicator"><Loader size={24} /></div>}
       </div>
       <div className="input-box">
         <input

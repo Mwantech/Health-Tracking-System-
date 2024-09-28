@@ -1,131 +1,177 @@
-const express = require('express');
-const router = express.Router();
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+import React, { useState, useEffect, useRef } from 'react';
+import FuzzySet from 'fuzzyset';
+import { ThumbsUp, ThumbsDown, Loader } from 'lucide-react';
+import './SymptomChecker.css';
 
-// ... (admin data and middleware)
-// In-memory storage for admins (replace this with your database logic)
-const admins = [
-  { id: 1, username: 'mwantech', password: '$2b$10$1234567890123456789012', canManageAdmins: true },
-  { id: 2, username: 'john smith', password: '$2b$10$0987654321098765432109', canManageAdmins: true }
-];
+const SymptomChecker = () => {
+  const [messages, setMessages] = useState([]);
+  const [userInput, setUserInput] = useState('');
+  const [intents, setIntents] = useState([]);
+  const [fuzzyMatcher, setFuzzyMatcher] = useState(null);
+  const [isFirstMessage, setIsFirstMessage] = useState(true);
+  const [conversationContext, setConversationContext] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const chatBoxRef = useRef(null);
 
-// List of superadmins who can manage other admins
-const superadmins = ['mwantech', 'john smith'];
+  useEffect(() => {
+    fetch('intents/intents.json')
+      .then(response => response.json())
+      .then(data => {
+        setIntents(data);
+        const allPatterns = data.flatMap(intent => intent.patterns);
+        setFuzzyMatcher(FuzzySet(allPatterns));
+      })
+      .catch(error => console.error('Error loading intents:', error));
 
-// JWT secret (should be stored in environment variables)
-const JWT_SECRET = process.env.JWT_SECRET || '80b4c49e9640788db141db4f101c7caacc61be284f78c0120b0e918936c6d50288323416090bd8bec1a0e6ecc5b32c0aead810b65418d1efd5903c11a76f887e';
+    const greetings = [
+      "Hello, I'm Novas, your AI symptom checker. How can I help you today?",
+      "Hi there! I'm Novas, ready to assist with your health concerns. What brings you here?",
+      "Welcome! I'm Novas, your virtual health assistant. What symptoms are you experiencing?",
+    ];
+    const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+    setMessages([{ className: "bot-msg", message: randomGreeting }]);
+  }, []);
 
-// Middleware to verify admin token
-const verifyAdminToken = (req, res, next) => {
-  const token = req.header('Authorization');
-  if (!token) return res.status(401).json({ error: 'Access denied' });
+  // ... [other functions remain the same]
 
-  try {
-    const verified = jwt.verify(token, JWT_SECRET);
-    req.admin = verified;
-    next();
-  } catch (error) {
-    res.status(401).json({ error: 'Invalid or expired token' });
-  }
+  const synonyms = {
+    "headache": ["migraine", "head pain"],
+    "fever": ["high temperature", "elevated temperature"],
+    "cough": ["hacking", "wheezing"],
+    // Add more synonyms here
+  };
+
+  const findMatchingIntent = (userInput) => {
+    const keyPhrases = extractKeyPhrases(userInput);
+    let bestMatch = null;
+    let highestMatchCount = 0;
+
+    // Expand key phrases with synonyms
+    const expandedKeyPhrases = keyPhrases.flatMap(phrase => 
+      [phrase, ...(synonyms[phrase] || [])]
+    );
+
+    // Use fuzzy matching to find the best matching pattern
+    const fuzzyMatches = fuzzyMatcher.get(userInput.toLowerCase(), null, 0.6);
+    if (fuzzyMatches && fuzzyMatches.length > 0) {
+      const [score, matchedPattern] = fuzzyMatches[0];
+      bestMatch = intents.find(intent => intent.patterns.includes(matchedPattern));
+    }
+
+    // If no fuzzy match, fall back to key phrase matching
+    if (!bestMatch) {
+      for (const intent of intents) {
+        for (const pattern of intent.patterns) {
+          const patternWords = pattern.toLowerCase().split(/\W+/).map(lemmatize);
+          const matchCount = patternWords.filter(word => expandedKeyPhrases.includes(word)).length;
+
+          if (matchCount > highestMatchCount) {
+            highestMatchCount = matchCount;
+            bestMatch = intent;
+          }
+        }
+      }
+    }
+
+    return bestMatch;
+  };
+
+  const handleUnrecognizedInput = (userInput) => {
+    const fuzzyMatches = fuzzyMatcher.get(userInput.toLowerCase(), [], 0.4);
+    if (fuzzyMatches.length > 0) {
+      const suggestions = fuzzyMatches.slice(0, 3).map(([score, match]) => match);
+      addChatMessage("bot-msg", `I'm not sure I understood that. Did you mean something like: ${suggestions.join(', ')}?`);
+    } else {
+      addChatMessage("bot-msg", "I apologize, but I'm not sure I fully understood your concern. Could you please rephrase or provide more details about your symptoms?");
+    }
+    saveUnrecognizedInput(userInput);
+  };
+
+  const sendMessage = () => {
+    if (userInput.trim() === "") return;
+
+    if (isFirstMessage) {
+      setMessages([]);
+      setIsFirstMessage(false);
+    }
+
+    addChatMessage("user-msg", userInput);
+    setIsLoading(true);
+
+    setTimeout(() => {
+      const matchingIntent = findMatchingIntent(userInput);
+      if (matchingIntent) {
+        const botResponse = matchingIntent.responses[Math.floor(Math.random() * matchingIntent.responses.length)];
+        addChatMessage("bot-msg", botResponse);
+
+        if (matchingIntent.precaution) {
+          const precautions = matchingIntent.precaution.join("<br>");
+          addChatMessage("bot-msg", `<b>Recommended actions:</b><br>${precautions}`);
+        }
+
+        if (matchingIntent.askForMedicalCenters || matchingIntent.precaution) {
+          askForNearbyMedicalCenters();
+        }
+
+        scheduleFollowUp();
+        
+        // Only ask for feedback if it's not a greeting
+        if (!matchingIntent.isGreeting) {
+          askForFeedback();
+        }
+
+        // Update conversation context
+        setConversationContext(prevContext => [...prevContext, matchingIntent.tag]);
+      } else {
+        handleUnrecognizedInput(userInput);
+      }
+
+      addChatMessage("bot-msg", "Remember, I'm an AI assistant and can't provide professional medical advice. If you're experiencing severe symptoms or have urgent concerns, please consult a healthcare professional or seek emergency services.");
+
+      setIsLoading(false);
+      setUserInput("");
+    }, 1000); // Simulating a delay for the bot's response
+  };
+
+  // ... [rest of the component code remains the same]
+
+  return (
+    <div className="chat-container">
+      <div className="chat-box" id="chat-box" ref={chatBoxRef}>
+        {messages.map((msg, index) => (
+          msg.isButtons ? (
+            <div key={index} className="button-container">
+              {msg.isFeedback ? (
+                <>
+                  <button className="response-button" onClick={() => handleFeedback(true)}><ThumbsUp size={20} /></button>
+                  <button className="response-button" onClick={() => handleFeedback(false)}><ThumbsDown size={20} /></button>
+                </>
+              ) : (
+                <>
+                  <button className="response-button" onClick={() => handleMedicalCenterResponse("yes")}>Yes</button>
+                  <button className="response-button" onClick={() => handleMedicalCenterResponse("no")}>No</button>
+                </>
+              )}
+            </div>
+          ) : (
+            <div key={index} className={msg.className} dangerouslySetInnerHTML={{ __html: msg.message }} />
+          )
+        ))}
+        {isLoading && <div className="loading-indicator"><Loader size={24} /></div>}
+      </div>
+      <div className="input-box">
+        <input
+          type="text"
+          id="user-input"
+          placeholder="Type your symptoms or questions here..."
+          value={userInput}
+          onChange={(e) => setUserInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+        />
+        <button onClick={sendMessage}>Send</button>
+      </div>
+    </div>
+  );
 };
 
-// Middleware to check if the admin is a superadmin
-const isSuperAdmin = (req, res, next) => {
-  if (superadmins.includes(req.admin.username)) {
-    next();
-  } else {
-    res.status(403).json({ error: 'Insufficient permissions' });
-  }
-};
-
-// Authenticate admin
-router.post('/authenticate', async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    const admin = admins.find(a => a.username === username);
-    
-    if (!admin) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    const validPassword = await bcrypt.compare(password, admin.password);
-    if (!validPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    const token = jwt.sign({ id: admin.id, username: admin.username }, JWT_SECRET, { expiresIn: '1h' });
-    const canManageAdmins = superadmins.includes(admin.username);
-    res.json({ token, canManageAdmins });
-  } catch (error) {
-    console.error('Authentication error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// ... (other routes)
-// Get all admins
-router.get('/', verifyAdminToken, isSuperAdmin, async (req, res) => {
-  try {
-    const adminList = admins.map(({ id, username, canManageAdmins }) => ({ id, username, canManageAdmins }));
-    res.json(adminList);
-  } catch (error) {
-    console.error('Error fetching admins:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Add new admin
-router.post('/', verifyAdminToken, isSuperAdmin, async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    
-    if (admins.some(a => a.username === username)) {
-      return res.status(400).json({ error: 'Admin already exists' });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
-    const newAdmin = { 
-      id: admins.length + 1,
-      username, 
-      password: hashedPassword, 
-      canManageAdmins: superadmins.includes(username)
-    };
-    
-    admins.push(newAdmin);
-    
-    res.status(201).json({ 
-      id: newAdmin.id, 
-      username: newAdmin.username, 
-      canManageAdmins: newAdmin.canManageAdmins 
-    });
-  } catch (error) {
-    console.error('Error adding new admin:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Delete admin
-router.delete('/:id', verifyAdminToken, isSuperAdmin, async (req, res) => {
-  try {
-    const id = parseInt(req.params.id);
-    const adminIndex = admins.findIndex(a => a.id === id);
-    
-    if (adminIndex === -1) {
-      return res.status(404).json({ error: 'Admin not found' });
-    }
-
-    if (superadmins.includes(admins[adminIndex].username)) {
-      return res.status(403).json({ error: 'Cannot delete a superadmin' });
-    }
-
-    admins.splice(adminIndex, 1);
-    res.json({ message: 'Admin deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting admin:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-module.exports = router;
+export default SymptomChecker;
