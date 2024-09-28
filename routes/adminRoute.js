@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const cors = require('cors');
+
+// Use CORS middleware
+router.use(cors());
 
 // In-memory storage for admins (replace this with your database logic)
 const admins = [
@@ -58,7 +62,7 @@ router.post('/authenticate', async (req, res) => {
     res.json({ token, canManageAdmins });
   } catch (error) {
     console.error('Authentication error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
 
@@ -69,7 +73,7 @@ router.get('/', verifyAdminToken, isSuperAdmin, async (req, res) => {
     res.json(adminList);
   } catch (error) {
     console.error('Error fetching admins:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
 
@@ -78,6 +82,10 @@ router.post('/', verifyAdminToken, isSuperAdmin, async (req, res) => {
   try {
     const { username, password } = req.body;
     
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
+
     if (admins.some(a => a.username === username)) {
       return res.status(400).json({ error: 'Admin already exists' });
     }
@@ -100,7 +108,7 @@ router.post('/', verifyAdminToken, isSuperAdmin, async (req, res) => {
     });
   } catch (error) {
     console.error('Error adding new admin:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
 
@@ -122,7 +130,7 @@ router.delete('/:id', verifyAdminToken, isSuperAdmin, async (req, res) => {
     res.json({ message: 'Admin deleted successfully' });
   } catch (error) {
     console.error('Error deleting admin:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
 

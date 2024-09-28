@@ -1,43 +1,51 @@
 const express = require('express');
-const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-
 const router = express.Router();
 
-// Login route
+// Assuming you have a database connection pool or client named 'db'
+// const db = require('./your-db-connection');
+
 router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, userType } = req.body;
 
   try {
-    // Query the database for the user
-    const [rows] = await pool.promise().query(
-      'SELECT * FROM admins WHERE username = ?',
-      [username]
-    );
+    let user;
+    if (userType === 'admin') {
+      // Query admin table
+      const query = 'SELECT * FROM admins WHERE username = $1';
+      const result = await db.query(query, [username]);
+      user = result.rows[0];
 
-    if (rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      if (user && user.password === password) {
+        // Admin authenticated
+        res.json({ success: true, userType: 'admin', token: 'admin123' });
+      } else {
+        res.status(401).json({ success: false, message: 'Invalid credentials' });
+      }
+    } else if (userType === 'doctor') {
+      // Query doctors table
+      const query = 'SELECT * FROM doctors WHERE username = $1';
+      const result = await db.query(query, [username]);
+      user = result.rows[0];
+
+      if (user) {
+        // Compare hashed password
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        if (passwordMatch) {
+          // Doctor authenticated
+          res.json({ success: true, userType: 'doctor', token: 'doctor123' });
+        } else {
+          res.status(401).json({ success: false, message: 'Invalid credentials' });
+        }
+      } else {
+        res.status(401).json({ success: false, message: 'Invalid credentials' });
+      }
+    } else {
+      res.status(400).json({ success: false, message: 'Invalid user type' });
     }
-
-    const user = rows[0];
-
-    // Compare the provided password with the stored hash
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    // Generate a JWT token
-    const token = jwt.sign({ userId: user.id, username: user.username }, 'your_jwt_secret', {
-      expiresIn: '1h'
-    });
-
-    res.json({ token });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 

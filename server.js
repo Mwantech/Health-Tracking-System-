@@ -19,14 +19,20 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "http://localhost:5173", // Updated to match your frontend port
     methods: ["GET", "POST", "PUT", "DELETE"]
   }
 });
 
 const port = 3001;
 
-app.use(cors());
+// CORS configuration
+app.use(cors({
+  origin: 'http://localhost:5173', // Updated to match your frontend port
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(bodyParser.json());
 
 // Create MySQL connection
@@ -44,6 +50,9 @@ connection.connect((err) => {
   }
   console.log('Connected to database.');
 });
+
+// JWT secret (should be in an environment variable in production)
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 
 // Login route
 app.post('/api/login', async (req, res) => {
@@ -67,16 +76,33 @@ app.post('/api/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ userId: user.id, username: user.username }, 'your_jwt_secret', {
-      expiresIn: '1h'
-    });
+    const token = jwt.sign(
+      { userId: user.id, username: user.username },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
 
-    res.json({ token });
+    res.json({ token, canManageAdmins: user.can_manage_admins === 1 });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
+
+// Middleware to verify JWT token
+const verifyToken = (req, res, next) => {
+  const token = req.header('Authorization');
+
+  if (!token) return res.status(401).json({ error: 'Access denied' });
+
+  try {
+    const verified = jwt.verify(token, JWT_SECRET);
+    req.user = verified;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+};
 
 // Use routes
 app.use('/api', orderRoutes(connection, io));
@@ -85,7 +111,7 @@ app.use('/api', healthIssueRoutes(connection));
 app.use('/api', telemedicineRoutes(connection));
 app.use('/api', testKitRoutes(connection));
 app.use('/api', appointmentRoutes(connection));
-app.use('/api/admin', adminRoutes);
+app.use('/api/admin', verifyToken, adminRoutes);
 
 // WebSocket connection
 io.on('connection', (socket) => {
@@ -94,6 +120,12 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('Client disconnected');
   });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something went wrong!', details: err.message });
 });
 
 server.listen(port, () => {
