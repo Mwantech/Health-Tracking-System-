@@ -17,37 +17,27 @@ const AdminManagement = () => {
 
   const fetchAdmins = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/admins', {
-        headers: { Authorization: token }
+      const response = await axios.get('http://localhost:3001/api/admin', {
+        headers: { Authorization: `Bearer ${token}` }
       });
       setAdmins(response.data);
     } catch (error) {
       console.error('Error fetching admins:', error);
+      alert('Failed to fetch admins. Please check your permissions.');
     }
   };
 
   const authenticateAdmin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/admins/authenticate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(authAdmin),
-      });
+      const response = await axios.post('http://localhost:3001/api/auth/login', authAdmin);
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      if (data.token) {
-        setToken(data.token);
+      const { token, user } = response.data;
+      if (token) {
+        setToken(token);
         setIsAuthenticated(true);
-        setCanManageAdmins(data.canManageAdmins);
-        if (!data.canManageAdmins) {
+        setCanManageAdmins(user.canManageAdmins);
+        if (!user.canManageAdmins) {
           alert('You do not have permission to manage admins.');
         }
       } else {
@@ -55,7 +45,7 @@ const AdminManagement = () => {
       }
     } catch (error) {
       console.error('Error authenticating admin:', error);
-      alert(`Authentication failed: ${error.message}`);
+      alert(`Authentication failed: ${error.response?.data?.error || error.message}`);
     }
   };
 
@@ -66,13 +56,14 @@ const AdminManagement = () => {
       return;
     }
     try {
-      await axios.post('http://localhost:3001/api/admins', newAdmin, {
-        headers: { Authorization: token }
+      await axios.post('http://localhost:3001/api/admin', newAdmin, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       fetchAdmins();
       setNewAdmin({ username: '', password: '' });
     } catch (error) {
       console.error('Error adding admin:', error);
+      alert(`Failed to add admin: ${error.response?.data?.error || error.message}`);
     }
   };
 
@@ -82,12 +73,13 @@ const AdminManagement = () => {
       return;
     }
     try {
-      await axios.delete(`http://localhost:3001/api/admins/${id}`, {
-        headers: { Authorization: token }
+      await axios.delete(`http://localhost:3001/api/admin/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       fetchAdmins();
     } catch (error) {
       console.error('Error deleting admin:', error);
+      alert(`Failed to delete admin: ${error.response?.data?.error || error.message}`);
     }
   };
 
