@@ -1,25 +1,13 @@
 const bcrypt = require('bcrypt');
-const { Admin } = require('./models/userModel');
+const saltRounds = 10;
+const plainPassword = 'josh123';
 
-async function seedAdmins() {
-  try {
-    const superadmins = [
-      { username: 'mwantech', password: 'password1' },
-      { username: 'john smith', password: 'password2' }
-    ];
-
-    for (const admin of superadmins) {
-      const hashedPassword = await bcrypt.hash(admin.password, 10);
-      await Admin.create({
-        username: admin.username,
-        password: hashedPassword
-      });
+bcrypt.hash(plainPassword, saltRounds, function(err, hashedPassword) {
+    if (err) {
+        console.error('Error hashing password:', err);
+    } else {
+        // Use this hashedPassword in your SQL statement
+        console.log('Hashed password:', hashedPassword);
+        // Now you can use this hashedPassword in your SQL statement
     }
-
-    console.log('Superadmins seeded successfully');
-  } catch (error) {
-    console.error('Error seeding superadmins:', error);
-  }
-}
-
-seedAdmins();
+});
