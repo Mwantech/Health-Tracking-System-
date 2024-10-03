@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './AdminLogin.css';
+
+// Define the base URL for your API
+const API_BASE_URL = 'http://localhost:3001'; // Adjust this to match your backend URL
 
 const AdminLogin = ({ onLogin }) => {
   const [username, setUsername] = useState('');
@@ -9,19 +13,42 @@ const AdminLogin = ({ onLogin }) => {
   const [userType, setUserType] = useState('admin');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (userType === 'admin' && username === 'admin' && password === 'password') {
-      onLogin('admin', 'admin123');
-      navigate('/admin');
-    } else if (userType === 'doctor' && username === 'doctor' && password === 'doctorpass') {
-      onLogin('doctor', 'doctor123');
-      navigate('/doctor');
-    } else {
-      setError('Invalid credentials. Please try again.');
+    setError('');
+
+    try {
+      const response = await axios.post(`${API_BASE_URL}/api/login`, {
+        username,
+        password,
+        userType
+      });
+
+      const { token, userType: responseUserType, username: responseUsername } = response.data;
+
+      // Store the token in localStorage or a secure storage method
+      localStorage.setItem('token', token);
+
+      // Call the onLogin function with the user information
+      onLogin(responseUserType, responseUsername);
+
+      // Navigate to the appropriate panel
+      if (responseUserType === 'admin') {
+        navigate('/admin');
+      } else if (responseUserType === 'doctor') {
+        navigate('/doctor');
+      }
+    } catch (error) {
+      if (error.response && error.response.data) {
+        setError(error.response.data.error || 'An error occurred during login');
+      } else {
+        setError('An error occurred during login');
+      }
+      console.error('Login error:', error);
     }
   };
 
+  // ... rest of the component remains the same
   return (
     <div className="adminlogin-container">
       <div className="card">

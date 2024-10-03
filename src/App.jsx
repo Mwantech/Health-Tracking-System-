@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import './App.css';
 import Header from './components/Header';
@@ -16,13 +16,31 @@ const App = () => {
   const [userType, setUserType] = useState('');
   const [userId, setUserId] = useState('');
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const storedUserType = localStorage.getItem('userType');
+    const storedUserId = localStorage.getItem('userId');
+
+    if (token && storedUserType && storedUserId) {
+      setIsAuthenticated(true);
+      setUserType(storedUserType);
+      setUserId(storedUserId);
+    }
+  }, []);
+
   const handleLogin = (type, id) => {
     setIsAuthenticated(true);
     setUserType(type);
     setUserId(id);
+    localStorage.setItem('token', 'some-token-value');
+    localStorage.setItem('userType', type);
+    localStorage.setItem('userId', id);
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userType');
+    localStorage.removeItem('userId');
     setIsAuthenticated(false);
     setUserType('');
     setUserId('');
@@ -36,9 +54,9 @@ const App = () => {
     </>
   );
 
-  const renderWithoutHeader = (Component) => (
+  const renderWithoutHeader = (Component, props = {}) => (
     <>
-      <Component />
+      <Component {...props} />
       <Footer />
     </>
   );
@@ -51,17 +69,17 @@ const App = () => {
           <Route path="/order-test-kits" element={renderWithHeaderFooter(OrderTestKits)} />
           <Route path="/Symptom-checker" element={renderWithHeaderFooter(Symptomchecker)} />
           <Route path="/Telemedicine" element={renderWithHeaderFooter(Telemedicine)} />
-          <Route path="/admin-login" element={renderWithoutHeader(() => <AdminLogin onLogin={handleLogin} />)} />
+          <Route path="/admin-login" element={renderWithoutHeader(AdminLogin, { onLogin: handleLogin })} />
           <Route 
             path="/admin" 
             element={isAuthenticated && userType === 'admin' 
-              ? renderWithoutHeader(AdminPage) 
+              ? renderWithoutHeader(AdminPage, { userId: userId }) 
               : <Navigate to="/admin-login" />} 
           />
           <Route 
             path="/doctor" 
             element={isAuthenticated && userType === 'doctor' 
-              ? renderWithoutHeader(() => <DoctorsPanelPage doctorId={userId} />)
+              ? renderWithoutHeader(DoctorsPanelPage, { doctorId: userId })
               : <Navigate to="/admin-login" />} 
           />
         </Routes>
