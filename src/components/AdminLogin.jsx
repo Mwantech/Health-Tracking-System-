@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './AdminLogin.css';
 
-// Define the base URL for your API
 const API_BASE_URL = 'http://localhost:3001'; // Adjust this to match your backend URL
 
 const AdminLogin = ({ onLogin }) => {
@@ -26,8 +25,11 @@ const AdminLogin = ({ onLogin }) => {
 
       const { token, userType: responseUserType, username: responseUsername } = response.data;
 
-      // Store the token in localStorage or a secure storage method
-      localStorage.setItem('token', token);
+      console.log('Login response:', response.data);
+
+      if (!token || !responseUserType || !responseUsername) {
+        throw new Error('Invalid response from server');
+      }
 
       // Call the onLogin function with the user information
       onLogin(responseUserType, responseUsername);
@@ -48,7 +50,6 @@ const AdminLogin = ({ onLogin }) => {
     }
   };
 
-  // ... rest of the component remains the same
   return (
     <div className="adminlogin-container">
       <div className="card">

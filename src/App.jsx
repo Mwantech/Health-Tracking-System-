@@ -21,29 +21,38 @@ const App = () => {
     const storedUserType = localStorage.getItem('userType');
     const storedUserId = localStorage.getItem('userId');
 
+    console.log('Initial auth state:', { token, storedUserType, storedUserId });
+
     if (token && storedUserType && storedUserId) {
       setIsAuthenticated(true);
       setUserType(storedUserType);
       setUserId(storedUserId);
+      console.log('User authenticated from local storage');
+    } else {
+      console.log('No valid authentication data in local storage');
     }
   }, []);
 
   const handleLogin = (type, id) => {
+    console.log('Logging in:', { type, id });
     setIsAuthenticated(true);
     setUserType(type);
     setUserId(id);
     localStorage.setItem('token', 'some-token-value');
     localStorage.setItem('userType', type);
     localStorage.setItem('userId', id);
+    console.log('Login successful, state updated');
   };
 
   const handleLogout = () => {
+    console.log('Logging out');
     localStorage.removeItem('token');
     localStorage.removeItem('userType');
     localStorage.removeItem('userId');
     setIsAuthenticated(false);
     setUserType('');
     setUserId('');
+    console.log('Logout complete, state reset');
   };
 
   const renderWithHeaderFooter = (Component) => (
@@ -54,12 +63,17 @@ const App = () => {
     </>
   );
 
-  const renderWithoutHeader = (Component, props = {}) => (
-    <>
-      <Component {...props} />
-      <Footer />
-    </>
-  );
+  const renderWithoutHeader = (Component, props = {}) => {
+    console.log('Rendering component without header:', Component.name, props);
+    return (
+      <>
+        <Component {...props} />
+        <Footer />
+      </>
+    );
+  };
+
+  console.log('Current auth state:', { isAuthenticated, userType, userId });
 
   return (
     <Router>
@@ -72,15 +86,25 @@ const App = () => {
           <Route path="/admin-login" element={renderWithoutHeader(AdminLogin, { onLogin: handleLogin })} />
           <Route 
             path="/admin" 
-            element={isAuthenticated && userType === 'admin' 
-              ? renderWithoutHeader(AdminPage, { userId: userId }) 
-              : <Navigate to="/admin-login" />} 
+            element={
+              (() => {
+                console.log('Rendering admin route:', { isAuthenticated, userType });
+                return isAuthenticated && userType === 'admin' 
+                  ? renderWithoutHeader(AdminPage, { userId: userId }) 
+                  : <Navigate to="/admin-login" />;
+              })()
+            } 
           />
           <Route 
             path="/doctor" 
-            element={isAuthenticated && userType === 'doctor' 
-              ? renderWithoutHeader(DoctorsPanelPage, { doctorId: userId })
-              : <Navigate to="/admin-login" />} 
+            element={
+              (() => {
+                console.log('Rendering doctor route:', { isAuthenticated, userType, userId });
+                return isAuthenticated && userType === 'doctor' 
+                  ? renderWithoutHeader(DoctorsPanelPage, { doctorId: userId })
+                  : <Navigate to="/admin-login" />;
+              })()
+            } 
           />
         </Routes>
       </div>
