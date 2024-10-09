@@ -52,6 +52,10 @@
   font-weight: bold;
   transition: color 0.3s ease;
 }
+.main-nav ul li.active a {
+  font-weight: bold;
+  color: #fff;
+}
 
 .main-nav ul li a:hover {
   color: #b3d9ff;

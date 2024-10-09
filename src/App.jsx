@@ -10,100 +10,131 @@ import Telemedicine from './pages/Telemedicine';
 import AdminPage from './pages/Admin page/Admin';
 import AdminLogin from './components/AdminLogin';
 import DoctorsPanelPage from './pages/Admin page/DoctorsPanelPage';
+import Login from './components/LoginPage';
+import Signup from './components/SignupPage';
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState('');
   const [userId, setUserId] = useState('');
+  const [doctorId, setDoctorId] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const tokenExpiration = localStorage.getItem('tokenExpiration');
     const storedUserType = localStorage.getItem('userType');
     const storedUserId = localStorage.getItem('userId');
+    const storedDoctorId = localStorage.getItem('doctorId');
 
-    console.log('Initial auth state:', { token, storedUserType, storedUserId });
-
-    if (token && storedUserType && storedUserId) {
+    if (token && tokenExpiration && new Date().getTime() < parseInt(tokenExpiration)) {
       setIsAuthenticated(true);
       setUserType(storedUserType);
-      setUserId(storedUserId);
-      console.log('User authenticated from local storage');
+      setUserId(storedUserId || '');
+
+      if (storedUserType === 'doctor') {
+        setDoctorId(storedDoctorId || storedUserId);
+      }
     } else {
-      console.log('No valid authentication data in local storage');
+      handleLogout();
     }
   }, []);
 
-  const handleLogin = (type, id) => {
-    console.log('Logging in:', { type, id });
+  const handleLogin = (type, id, token, doctorId = null) => {
+    const expirationTime = new Date().getTime() + 60 * 60 * 1000; // 1 hour from now
+    localStorage.setItem('token', token);
+    localStorage.setItem('tokenExpiration', expirationTime.toString());
+    localStorage.setItem('userType', type);
+    localStorage.setItem('userId', id);
     setIsAuthenticated(true);
     setUserType(type);
     setUserId(id);
-    localStorage.setItem('token', 'some-token-value');
-    localStorage.setItem('userType', type);
-    localStorage.setItem('userId', id);
-    console.log('Login successful, state updated');
+    if (type === 'doctor' && doctorId) {
+      setDoctorId(doctorId);
+      localStorage.setItem('doctorId', doctorId);
+    }
   };
 
   const handleLogout = () => {
-    console.log('Logging out');
     localStorage.removeItem('token');
+    localStorage.removeItem('tokenExpiration');
     localStorage.removeItem('userType');
     localStorage.removeItem('userId');
+    localStorage.removeItem('doctorId');
     setIsAuthenticated(false);
     setUserType('');
     setUserId('');
-    console.log('Logout complete, state reset');
+    setDoctorId('');
   };
 
-  const renderWithHeaderFooter = (Component) => (
+  const PrivateRoute = ({ children }) => {
+    return isAuthenticated ? children : <Navigate to="/login" />;
+  };
+
+  const renderWithHeaderFooter = (Component, props = {}) => (
     <>
       <Header isAuthenticated={isAuthenticated} onLogout={handleLogout} />
-      <Component />
+      <Component {...props} />
       <Footer />
     </>
   );
 
-  const renderWithoutHeader = (Component, props = {}) => {
-    console.log('Rendering component without header:', Component.name, props);
-    return (
-      <>
-        <Component {...props} />
-        <Footer />
-      </>
-    );
-  };
-
-  console.log('Current auth state:', { isAuthenticated, userType, userId });
+  const renderWithoutHeader = (Component, props = {}) => (
+    <>
+      <Component {...props} />
+      <Footer />
+    </>
+  );
 
   return (
     <Router>
       <div className="app-container">
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={renderWithHeaderFooter(HomePage)} />
-          <Route path="/order-test-kits" element={renderWithHeaderFooter(OrderTestKits)} />
-          <Route path="/Symptom-checker" element={renderWithHeaderFooter(Symptomchecker)} />
-          <Route path="/Telemedicine" element={renderWithHeaderFooter(Telemedicine)} />
-          <Route path="/admin-login" element={renderWithoutHeader(AdminLogin, { onLogin: handleLogin })} />
+          <Route path="/login" element={renderWithHeaderFooter(() => <Login onLogin={handleLogin} />)} />
+          <Route path="/signup" element={renderWithHeaderFooter(Signup)} />
+
+          {/* Protected Routes */}
+          <Route 
+            path="/order-test-kits" 
+            element={<PrivateRoute>{renderWithHeaderFooter(OrderTestKits)}</PrivateRoute>} 
+          />
+          <Route 
+            path="/Symptom-checker" 
+            element={<PrivateRoute>{renderWithHeaderFooter(Symptomchecker)}</PrivateRoute>} 
+          />
+          <Route 
+            path="/Telemedicine" 
+            element={<PrivateRoute>{renderWithHeaderFooter(Telemedicine)}</PrivateRoute>} 
+          />
+
+          {/* Admin and Doctor Routes */}
+          <Route 
+            path="/admin-login" 
+            element={renderWithoutHeader(AdminLogin, { onLogin: handleLogin })} 
+          />
           <Route 
             path="/admin" 
             element={
-              (() => {
-                console.log('Rendering admin route:', { isAuthenticated, userType });
-                return isAuthenticated && userType === 'admin' 
-                  ? renderWithoutHeader(AdminPage, { userId: userId }) 
-                  : <Navigate to="/admin-login" />;
-              })()
+              isAuthenticated && userType === 'admin' 
+                ? renderWithoutHeader(AdminPage, { userId }) 
+                : <Navigate to="/admin-login" />
             } 
           />
           <Route 
             path="/doctor" 
             element={
-              (() => {
-                console.log('Rendering doctor route:', { isAuthenticated, userType, userId });
-                return isAuthenticated && userType === 'doctor' 
-                  ? renderWithoutHeader(DoctorsPanelPage, { doctorId: userId })
-                  : <Navigate to="/admin-login" />;
-              })()
+              isAuthenticated && userType === 'doctor' 
+                ? <Navigate to={`/doctor/${doctorId}`} replace /> 
+                : <Navigate to="/admin-login" />
+            } 
+          />
+          <Route 
+            path="/doctor/:id" 
+            element={
+              isAuthenticated && userType === 'doctor' 
+                ? renderWithoutHeader(DoctorsPanelPage, { doctorId }) 
+                : <Navigate to="/admin-login" />
             } 
           />
         </Routes>

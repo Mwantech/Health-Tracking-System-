@@ -1,116 +1,147 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import './AdminLogin.css';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import './App.css';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import HomePage from './pages/homepage';
+import OrderTestKits from './pages/ordertestkits';
+import Symptomchecker from './pages/SymptomChecker';
+import Telemedicine from './pages/Telemedicine';
+import AdminPage from './pages/Admin page/Admin';
+import AdminLogin from './components/AdminLogin';
+import DoctorsPanelPage from './pages/Admin page/DoctorsPanelPage';
+import Login from './components/LoginPage';
+import Signup from './components/SignupPage';
 
-const API_BASE_URL = 'http://localhost:3001'; // Adjust this to match your backend URL
+const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userType, setUserType] = useState('');
+  const [userId, setUserId] = useState('');
+  const [doctorId, setDoctorId] = useState('');
 
-const AdminLogin = ({ onLogin }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [userType, setUserType] = useState('admin');
-  const navigate = useNavigate();
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const tokenExpiration = localStorage.getItem('tokenExpiration');
+    const storedUserType = localStorage.getItem('userType');
+    const storedUserId = localStorage.getItem('userId');
+    const storedDoctorId = localStorage.getItem('doctorId');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
+    if (token && tokenExpiration && new Date().getTime() < parseInt(tokenExpiration)) {
+      setIsAuthenticated(true);
+      setUserType(storedUserType);
+      setUserId(storedUserId || '');
 
-    try {
-      const response = await axios.post(`${API_BASE_URL}/api/login`, {
-        username,
-        password,
-        userType
-      });
-
-      const { token, userType: responseUserType, userId } = response.data;
-
-      console.log('Login response:', response.data); // Add this line for debugging
-
-      if (!userId) {
-        throw new Error('User ID is missing from the login response');
+      if (storedUserType === 'doctor') {
+        setDoctorId(storedDoctorId || storedUserId);
       }
+    } else {
+      // Token expired or not present, clear localStorage
+      handleLogout();
+    }
+  }, []);
 
-      // Call the onLogin function with the user information
-      onLogin(responseUserType, userId);
-
-      // Navigate to the appropriate panel
-      if (responseUserType === 'admin') {
-        navigate('/admin');
-      } else if (responseUserType === 'doctor') {
-        navigate('/doctor');
-      }
-    } catch (error) {
-      if (error.response && error.response.data) {
-        setError(error.response.data.error || 'An error occurred during login');
-      } else {
-        setError('An error occurred during login');
-      }
-      console.error('Login error:', error);
+  const handleLogin = (type, id, token, doctorId = null) => {
+    const expirationTime = new Date().getTime() + 60 * 60 * 1000; // 1 hour from now
+    localStorage.setItem('token', token);
+    localStorage.setItem('tokenExpiration', expirationTime.toString());
+    localStorage.setItem('userType', type);
+    localStorage.setItem('userId', id);
+    setIsAuthenticated(true);
+    setUserType(type);
+    setUserId(id);
+    if (type === 'doctor' && doctorId) {
+      setDoctorId(doctorId);
+      localStorage.setItem('doctorId', doctorId);
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('tokenExpiration');
+    localStorage.removeItem('userType');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('doctorId');
+    setIsAuthenticated(false);
+    setUserType('');
+    setUserId('');
+    setDoctorId('');
+  };
+
+  const PrivateRoute = ({ children }) => {
+    return isAuthenticated ? children : <Navigate to="/login" />;
+  };
+
+  const renderWithHeaderFooter = (Component) => (
+    <>
+      <Header isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+      <Component />
+      <Footer />
+    </>
+  );
+
+  const renderWithoutHeader = (Component, props = {}) => (
+    <>
+      <Component {...props} />
+      <Footer />
+    </>
+  );
+
   return (
-    <div className="adminlogin-container">
-      <div className="card">
-        <div className="card-header">
-          <h1 className="card-title">{userType === 'admin' ? 'Admin' : 'Doctor'} Login</h1>
-        </div>
-        <div className="card-content">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="userType" className="block text-sm font-medium text-gray-700">
-                Login As
-              </label>
-              <select
-                id="userType"
-                className="input"
-                value={userType}
-                onChange={(e) => setUserType(e.target.value)}
-              >
-                <option value="admin">Admin</option>
-                <option value="doctor">Doctor</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                Username
-              </label>
-              <input
-                type="text"
-                id="username"
-                className="input"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                className="input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            {error && (
-              <div className="alert">
-                <span className="alert-description">{error}</span>
-              </div>
-            )}
-            <button type="submit" className="button">
-              Login
-            </button>
-          </form>
-        </div>
+    <Router>
+      <div className="app-container">
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={renderWithHeaderFooter(HomePage)} />
+          <Route path="/login" element={renderWithHeaderFooter(() => <Login onLogin={handleLogin} />)} />
+          <Route path="/signup" element={renderWithHeaderFooter(Signup)} />
+
+          {/* Protected Routes */}
+          <Route 
+            path="/order-test-kits" 
+            element={<PrivateRoute>{renderWithHeaderFooter(OrderTestKits)}</PrivateRoute>} 
+          />
+          <Route 
+            path="/Symptom-checker" 
+            element={<PrivateRoute>{renderWithHeaderFooter(Symptomchecker)}</PrivateRoute>} 
+          />
+          <Route 
+            path="/Telemedicine" 
+            element={<PrivateRoute>{renderWithHeaderFooter(Telemedicine)}</PrivateRoute>} 
+          />
+
+          {/* Admin and Doctor Routes */}
+          <Route 
+            path="/admin-login" 
+            element={renderWithoutHeader(AdminLogin, { onLogin: handleLogin })} 
+          />
+          <Route 
+            path="/admin" 
+            element={
+              isAuthenticated && userType === 'admin' 
+                ? renderWithoutHeader(AdminPage, { userId }) 
+                : <Navigate to="/admin-login" />
+            } 
+          />
+          <Route 
+            path="/doctor" 
+            element={
+              isAuthenticated && userType === 'doctor' 
+                ? <Navigate to={`/doctor/${doctorId}`} replace /> 
+                : <Navigate to="/admin-login" />
+            } 
+          />
+          <Route 
+            path="/doctor/:id" 
+            element={
+              isAuthenticated && userType === 'doctor' 
+                ? renderWithoutHeader(DoctorsPanelPage, { doctorId }) 
+                : <Navigate to="/admin-login" />
+            } 
+          />
+        </Routes>
       </div>
-    </div>
+    </Router>
   );
 };
 
-export default AdminLogin;
+export default App;

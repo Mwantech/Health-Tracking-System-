@@ -15,42 +15,62 @@ const AdminLogin = ({ onLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
+    console.log('Login attempt:', { username, userType });
+  
     try {
       const response = await axios.post(`${API_BASE_URL}/api/login`, {
         username,
         password,
-        userType
+        userType,
       });
-
-      const { token, userType: responseUserType, username: responseUsername } = response.data;
-
-      console.log('Login response:', response.data);
-
+  
+      console.log('Full login response:', response.data);
+  
+      const { token, userType: responseUserType, username: responseUsername, userId, doctorId } = response.data;
+  
       if (!token || !responseUserType || !responseUsername) {
+        console.error('Invalid response structure:', response.data);
         throw new Error('Invalid response from server');
       }
-
-      // Call the onLogin function with the user information
-      onLogin(responseUserType, responseUsername);
-
-      // Navigate to the appropriate panel
+  
+      console.log('Parsed response:', { token, responseUserType, responseUsername, userId, doctorId });
+  
+      localStorage.setItem('token', token);
+      localStorage.setItem('userType', responseUserType);
+      localStorage.setItem('username', responseUsername);
+      
+      if (userId) {
+        localStorage.setItem('userId', userId);
+      } else {
+        console.warn('userId not provided by server');
+      }
+      
+      if (responseUserType === 'doctor') {
+        if (doctorId) {
+          localStorage.setItem('doctorId', doctorId);
+          console.log('Stored doctorId in localStorage:', doctorId);
+        } else {
+          console.warn('Doctor ID not provided by server, using userId as fallback');
+          localStorage.setItem('doctorId', userId || '');
+        }
+      }
+  
+      console.log('Calling onLogin with:', responseUserType, userId || '', doctorId || userId || '');
+      onLogin(responseUserType, userId || '', doctorId || userId || '');
+  
       if (responseUserType === 'admin') {
         navigate('/admin');
       } else if (responseUserType === 'doctor') {
-        navigate('/doctor');
+        navigate(`/doctor/${doctorId || userId || ''}`);
       }
     } catch (error) {
-      if (error.response && error.response.data) {
-        setError(error.response.data.error || 'An error occurred during login');
-      } else {
-        setError('An error occurred during login');
-      }
       console.error('Login error:', error);
+      setError(error.response?.data?.message || error.message || 'An error occurred during login');
     }
   };
 
-  return (
+  // ... rest of the component (return statement) remains the same
+   return (
     <div className="adminlogin-container">
       <div className="card">
         <div className="card-header">
