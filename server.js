@@ -16,7 +16,7 @@ const telemedicineRoutes = require('./routes/telemedicineRoutes');
 const testKitRoutes = require('./routes/testKitRoutes');
 const appointmentRoutes = require('./routes/TelemedicineBookingRoutes');
 const LoginRoutes = require('./routes/loginRoutes');
-const loginRoutes = require('./routes/loginRoutes');
+const UsersLoginRoutes = require('./routes/UsersLoginRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -62,7 +62,8 @@ app.use('/api', healthIssueRoutes(connection));
 app.use('/api', telemedicineRoutes(connection));
 app.use('/api', testKitRoutes(connection));
 app.use('/api', appointmentRoutes(connection));
-app.use('/api', loginRoutes(connection));
+app.use('/api', LoginRoutes(connection));
+app.use('/api', UsersLoginRoutes(connection));
 
 // WebSocket connection
 io.on('connection', (socket) => {

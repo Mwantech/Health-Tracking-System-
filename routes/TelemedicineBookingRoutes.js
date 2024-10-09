@@ -97,22 +97,96 @@ module.exports = (connection) => {
     }
   });
 
-  // Fetch appointments for a specific doctor
-  router.get('/doctor/:doctorId/appointments', async (req, res) => {
-    const { doctorId } = req.params;
+  // Login route
+router.post('/api/login', async (req, res) => {
+  const { username, password, userType } = req.body;
 
-    try {
-      const [rows] = await connection.promise().query(
-        'SELECT id, patient_name, appointment_date, appointment_time, room_code FROM appointments WHERE doctor_id = ? ORDER BY appointment_date, appointment_time',
-        [doctorId]
+  try {
+    let user;
+    if (userType === 'admin') {
+      // Admin login logic (assuming you have an admins table)
+      [user] = await connection.promise().query(
+        'SELECT * FROM admins WHERE username = ? AND password = ?',
+        [username, password]
       );
-
-      res.json(rows);
-    } catch (error) {
-      console.error('Error fetching appointments:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    } else if (userType === 'doctor') {
+      // Doctor login logic
+      [user] = await connection.promise().query(
+        'SELECT id, name, specialization FROM doctors WHERE name = ? AND password = ?',
+        [username, password]
+      );
     }
-  });
 
+    if (user && user.length > 0) {
+      const userData = user[0];
+      const token = 'generated-token'; // In a real app, generate a proper JWT token here
+      
+      if (userType === 'doctor') {
+        res.json({
+          token,
+          userType,
+          username: userData.name,
+          doctorId: userData.id // Ensure this is the numeric ID from the database
+        });
+      } else {
+        res.json({
+          token,
+          userType,
+          username: userData.username
+        });
+      }
+    } else {
+      res.status(401).json({ error: 'Invalid credentials' });
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Internal server error', details: error.message });
+  }
+});
+
+// Updated Doctor Appointments Route
+router.get('/doctor/:doctorId/appointments', async (req, res) => {
+  console.log('Received request for doctor appointments');
+  console.log('Request params:', req.params);
+
+  let { doctorId } = req.params;
+
+  if (!doctorId) {
+    console.error('Doctor ID is missing in the request');
+    return res.status(400).json({ error: 'Doctor ID is required' });
+  }
+
+  try {
+    const numericDoctorId = parseInt(doctorId);
+    if (isNaN(numericDoctorId)) {
+      console.error('Invalid doctor ID provided:', doctorId);
+      return res.status(400).json({ error: 'Invalid doctor ID' });
+    }
+
+    console.log('Executing database query for doctor ID:', numericDoctorId);
+    const [rows] = await connection.promise().query(
+      'SELECT doctor_id, patient_name, user_email, appointment_date, appointment_time, room_code, issues FROM appointments WHERE doctor_id = ? ORDER BY appointment_date, appointment_time',
+      [numericDoctorId]
+    );
+
+    console.log(`Fetched ${rows.length} appointments for doctor ${numericDoctorId}`);
+    
+    const sanitizedAppointments = rows.map(appointment => ({
+      doctorId: appointment.doctor_id,
+      patientName: appointment.patient_name,
+      userEmail: appointment.user_email,
+      date: appointment.appointment_date.toISOString().split('T')[0],
+      time: appointment.appointment_time,
+      roomCode: appointment.room_code,
+      issues: appointment.issues
+    }));
+
+    res.json(sanitizedAppointments);
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+    res.status(500).json({ error: 'Internal server error', details: error.message });
+  }
+  });
+  
   return router;
 };
