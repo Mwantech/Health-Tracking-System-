@@ -14,7 +14,7 @@ const doctorRoutes = require('./routes/doctorRoutes');
 const healthIssueRoutes = require('./routes/healthIssueRoutes');
 const telemedicineRoutes = require('./routes/telemedicineRoutes');
 const testKitRoutes = require('./routes/testKitRoutes');
-const appointmentRoutes = require('./routes/TelemedicineBookingRoutes');
+const appointmentRoutes = require('./routes/appointmentRoutes');
 const LoginRoutes = require('./routes/loginRoutes');
 const UsersLoginRoutes = require('./routes/UsersLoginRoutes');
 

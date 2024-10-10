@@ -4,21 +4,28 @@ const router = express.Router();
 require('dotenv').config();
 
 const sendEmail = async (to, subject, text) => {
-  if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD
-      }
-    });
-
-    await transporter.sendMail({ from: process.env.GMAIL_USER, to, subject, text });
-  } else {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
     console.log('Email sending is not configured. Would send email with following details:');
     console.log(`To: ${to}`);
     console.log(`Subject: ${subject}`);
     console.log(`Body: ${text}`);
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD
+    }
+  });
+
+  try {
+    await transporter.sendMail({ from: process.env.GMAIL_USER, to, subject, text });
+    console.log('Email sent successfully');
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw error; // Re-throw the error so it can be caught in the route handler
   }
 };
 
@@ -69,6 +76,7 @@ module.exports = (connection) => {
       );
 
       // Attempt to send email
+      let emailSent = false;
       try {
         await sendEmail(
           email,
@@ -76,7 +84,7 @@ module.exports = (connection) => {
           `
           Your appointment has been confirmed.
           Patient Name: ${patientName}
-          Doctor: ${doctor.names} (${doctor.specialization})
+          Doctor: ${doctor.name} (${doctor.specialization})
           Date: ${date}
           Time: ${time}
           Room Code: ${roomCode}
@@ -85,108 +93,25 @@ module.exports = (connection) => {
           Please use this room code to join your video call at the scheduled time.
           `
         );
+        emailSent = true;
+        console.log('Appointment confirmation email sent successfully');
       } catch (emailError) {
         console.error('Failed to send email:', emailError);
-        // We're not failing the request due to email error
+        // Email sending failed, but we'll still create the appointment
       }
 
-      res.json({ success: true, roomCode, doctorName: doctor.names, price: doctor.price });
+      res.json({ 
+        success: true, 
+        roomCode, 
+        doctorName: doctor.name, 
+        price: doctor.price,
+        emailSent // Include whether the email was sent successfully in the response
+      });
     } catch (error) {
       console.error('Error creating appointment:', error);
       res.status(500).json({ success: false, error: 'Internal server error' });
     }
   });
 
-  // Login route
-router.post('/api/login', async (req, res) => {
-  const { username, password, userType } = req.body;
-
-  try {
-    let user;
-    if (userType === 'admin') {
-      // Admin login logic (assuming you have an admins table)
-      [user] = await connection.promise().query(
-        'SELECT * FROM admins WHERE username = ? AND password = ?',
-        [username, password]
-      );
-    } else if (userType === 'doctor') {
-      // Doctor login logic
-      [user] = await connection.promise().query(
-        'SELECT id, name, specialization FROM doctors WHERE name = ? AND password = ?',
-        [username, password]
-      );
-    }
-
-    if (user && user.length > 0) {
-      const userData = user[0];
-      const token = 'generated-token'; // In a real app, generate a proper JWT token here
-      
-      if (userType === 'doctor') {
-        res.json({
-          token,
-          userType,
-          username: userData.name,
-          doctorId: userData.id // Ensure this is the numeric ID from the database
-        });
-      } else {
-        res.json({
-          token,
-          userType,
-          username: userData.username
-        });
-      }
-    } else {
-      res.status(401).json({ error: 'Invalid credentials' });
-    }
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Internal server error', details: error.message });
-  }
-});
-
-// Updated Doctor Appointments Route
-router.get('/doctor/:doctorId/appointments', async (req, res) => {
-  console.log('Received request for doctor appointments');
-  console.log('Request params:', req.params);
-
-  let { doctorId } = req.params;
-
-  if (!doctorId) {
-    console.error('Doctor ID is missing in the request');
-    return res.status(400).json({ error: 'Doctor ID is required' });
-  }
-
-  try {
-    const numericDoctorId = parseInt(doctorId);
-    if (isNaN(numericDoctorId)) {
-      console.error('Invalid doctor ID provided:', doctorId);
-      return res.status(400).json({ error: 'Invalid doctor ID' });
-    }
-
-    console.log('Executing database query for doctor ID:', numericDoctorId);
-    const [rows] = await connection.promise().query(
-      'SELECT doctor_id, patient_name, user_email, appointment_date, appointment_time, room_code, issues FROM appointments WHERE doctor_id = ? ORDER BY appointment_date, appointment_time',
-      [numericDoctorId]
-    );
-
-    console.log(`Fetched ${rows.length} appointments for doctor ${numericDoctorId}`);
-    
-    const sanitizedAppointments = rows.map(appointment => ({
-      doctorId: appointment.doctor_id,
-      patientName: appointment.patient_name,
-      userEmail: appointment.user_email,
-      date: appointment.appointment_date.toISOString().split('T')[0],
-      time: appointment.appointment_time,
-      roomCode: appointment.room_code,
-      issues: appointment.issues
-    }));
-
-    res.json(sanitizedAppointments);
-  } catch (error) {
-    console.error('Error fetching appointments:', error);
-    res.status(500).json({ error: 'Internal server error', details: error.message });
-  }
-  });
-  
   return router;
 };

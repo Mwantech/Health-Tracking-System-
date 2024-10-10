@@ -1,6 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken'); // Make sure to install jsonwebtoken package
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 
@@ -48,7 +48,19 @@ module.exports = (connection) => {
                     { expiresIn: '1h' }
                 );
 
-                res.json({ token, userType, username: user.username });
+                // Include userId and doctorId in the response
+                const responseData = {
+                    token,
+                    userType,
+                    username: user.username,
+                    userId: user.id
+                };
+
+                if (userType === 'doctor') {
+                    responseData.doctorId = user.id;
+                }
+
+                res.json(responseData);
             });
         } catch (error) {
             console.error('Error during login:', error);
