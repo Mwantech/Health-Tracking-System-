@@ -1,147 +1,102 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import './App.css';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import HomePage from './pages/homepage';
-import OrderTestKits from './pages/ordertestkits';
-import Symptomchecker from './pages/SymptomChecker';
-import Telemedicine from './pages/Telemedicine';
-import AdminPage from './pages/Admin page/Admin';
-import AdminLogin from './components/AdminLogin';
-import DoctorsPanelPage from './pages/Admin page/DoctorsPanelPage';
-import Login from './components/LoginPage';
-import Signup from './components/SignupPage';
+import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userType, setUserType] = useState('');
-  const [userId, setUserId] = useState('');
-  const [doctorId, setDoctorId] = useState('');
+const DoctorsPanelPage = ({ doctorId: propDoctorId }) => {
+  // ... other code remains the same ...
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { id: urlDoctorId } = useParams();
+  const navigate = useNavigate();
+
+  const effectiveDoctorId = propDoctorId || urlDoctorId || localStorage.getItem('doctorId');
+
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const tokenExpiration = localStorage.getItem('tokenExpiration');
-    const storedUserType = localStorage.getItem('userType');
-    const storedUserId = localStorage.getItem('userId');
-    const storedDoctorId = localStorage.getItem('doctorId');
+    // ... other code remains the same ...
+    console.log('DoctorsPanelPage: Component mounted');
+    console.log('propDoctorId:', propDoctorId);
+    console.log('urlDoctorId:', urlDoctorId);
+    console.log('localStorage doctorId:', localStorage.getItem('doctorId'));
+    console.log('DoctorsPanelPage: Effective doctorId:', effectiveDoctorId);
 
-    if (token && tokenExpiration && new Date().getTime() < parseInt(tokenExpiration)) {
-      setIsAuthenticated(true);
-      setUserType(storedUserType);
-      setUserId(storedUserId || '');
-
-      if (storedUserType === 'doctor') {
-        setDoctorId(storedDoctorId || storedUserId);
+    const fetchAppointments = async () => {
+      if (!effectiveDoctorId) {
+        // ... error handling ...
+          console.error('DoctorsPanelPage: No doctorId available');
+          setError('No doctor ID available. Please log in again.');
+          setLoading(false);
+          navigate('/admin-login');
+          return;
       }
+
+      const url = `http://localhost:3001/api/doctor/${effectiveDoctorId}/appointments`;
+      console.log('DoctorsPanelPage: Fetching appointments from:', url);
+
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
+        const response = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        console.log('DoctorsPanelPage: Response data:', response.data);
+        setAppointments(response.data);
+        setLoading(false);
+      } catch (err) {
+        // ... error handling ...
+        console.error('DoctorsPanelPage: Fetch error:', err);
+        console.error('Error details:', err.response ? err.response.data : 'No response data');
+        if (err.response && err.response.status === 401) {
+          setError('Authentication failed. Please log in again.');
+          navigate('/admin-login');
+        } else {
+          setError(`Failed to fetch appointments. ${err.message}`);
+        }
+        setLoading(false);
+      }
+    };
+
+    // ... rest of the code ...
+    if (effectiveDoctorId) {
+      fetchAppointments();
     } else {
-      // Token expired or not present, clear localStorage
-      handleLogout();
+      console.log('DoctorsPanelPage: No doctorId available, redirecting to login');
+      navigate('/admin-login');
     }
-  }, []);
+  }, [effectiveDoctorId, navigate, propDoctorId, urlDoctorId]);
 
-  const handleLogin = (type, id, token, doctorId = null) => {
-    const expirationTime = new Date().getTime() + 60 * 60 * 1000; // 1 hour from now
-    localStorage.setItem('token', token);
-    localStorage.setItem('tokenExpiration', expirationTime.toString());
-    localStorage.setItem('userType', type);
-    localStorage.setItem('userId', id);
-    setIsAuthenticated(true);
-    setUserType(type);
-    setUserId(id);
-    if (type === 'doctor' && doctorId) {
-      setDoctorId(doctorId);
-      localStorage.setItem('doctorId', doctorId);
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('tokenExpiration');
-    localStorage.removeItem('userType');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('doctorId');
-    setIsAuthenticated(false);
-    setUserType('');
-    setUserId('');
-    setDoctorId('');
-  };
-
-  const PrivateRoute = ({ children }) => {
-    return isAuthenticated ? children : <Navigate to="/login" />;
-  };
-
-  const renderWithHeaderFooter = (Component) => (
-    <>
-      <Header isAuthenticated={isAuthenticated} onLogout={handleLogout} />
-      <Component />
-      <Footer />
-    </>
-  );
-
-  const renderWithoutHeader = (Component, props = {}) => (
-    <>
-      <Component {...props} />
-      <Footer />
-    </>
-  );
+  // ... rest of the component ...
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
-    <Router>
-      <div className="app-container">
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={renderWithHeaderFooter(HomePage)} />
-          <Route path="/login" element={renderWithHeaderFooter(() => <Login onLogin={handleLogin} />)} />
-          <Route path="/signup" element={renderWithHeaderFooter(Signup)} />
-
-          {/* Protected Routes */}
-          <Route 
-            path="/order-test-kits" 
-            element={<PrivateRoute>{renderWithHeaderFooter(OrderTestKits)}</PrivateRoute>} 
-          />
-          <Route 
-            path="/Symptom-checker" 
-            element={<PrivateRoute>{renderWithHeaderFooter(Symptomchecker)}</PrivateRoute>} 
-          />
-          <Route 
-            path="/Telemedicine" 
-            element={<PrivateRoute>{renderWithHeaderFooter(Telemedicine)}</PrivateRoute>} 
-          />
-
-          {/* Admin and Doctor Routes */}
-          <Route 
-            path="/admin-login" 
-            element={renderWithoutHeader(AdminLogin, { onLogin: handleLogin })} 
-          />
-          <Route 
-            path="/admin" 
-            element={
-              isAuthenticated && userType === 'admin' 
-                ? renderWithoutHeader(AdminPage, { userId }) 
-                : <Navigate to="/admin-login" />
-            } 
-          />
-          <Route 
-            path="/doctor" 
-            element={
-              isAuthenticated && userType === 'doctor' 
-                ? <Navigate to={`/doctor/${doctorId}`} replace /> 
-                : <Navigate to="/admin-login" />
-            } 
-          />
-          <Route 
-            path="/doctor/:id" 
-            element={
-              isAuthenticated && userType === 'doctor' 
-                ? renderWithoutHeader(DoctorsPanelPage, { doctorId }) 
-                : <Navigate to="/admin-login" />
-            } 
-          />
-        </Routes>
-      </div>
-    </Router>
+    <div>
+      <h1>Doctors Panel</h1>
+      <h2>Appointments for Doctor ID: {effectiveDoctorId}</h2>
+      {appointments.length === 0 ? (
+        <p>No appointments scheduled.</p>
+      ) : (
+        <ul>
+          {appointments.map((appointment, index) => (
+            <li key={index}>
+              <p>Patient: {appointment.patientName}</p>
+              <p>Email: {appointment.userEmail}</p>
+              <p>Date: {appointment.date}</p>
+              <p>Time: {appointment.time}</p>
+              <p>Room: {appointment.roomCode}</p>
+              <p>Issues: {appointment.issues}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 };
 
-export default App;
+export default DoctorsPanelPage;

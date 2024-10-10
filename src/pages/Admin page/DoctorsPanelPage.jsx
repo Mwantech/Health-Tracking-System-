@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import './DoctorsPanel.css';
 
 const DoctorsPanelPage = ({ doctorId: propDoctorId }) => {
   const [appointments, setAppointments] = useState([]);
@@ -12,19 +13,15 @@ const DoctorsPanelPage = ({ doctorId: propDoctorId }) => {
   const effectiveDoctorId = propDoctorId || urlDoctorId || localStorage.getItem('doctorId');
 
   useEffect(() => {
-    console.log('DoctorsPanelPage: Effective doctorId:', effectiveDoctorId);
-    
     const fetchAppointments = async () => {
       if (!effectiveDoctorId) {
-        console.error('DoctorsPanelPage: No doctorId available');
         setError('No doctor ID available. Please log in again.');
         setLoading(false);
         navigate('/admin-login');
         return;
       }
 
-      const url = `http://localhost:3001/doctor/${effectiveDoctorId}/appointments`;
-      console.log('DoctorsPanelPage: Fetching appointments from:', url);
+      const url = `http://localhost:3001/api/doctor/${effectiveDoctorId}/appointments`;
 
       try {
         const token = localStorage.getItem('token');
@@ -37,47 +34,52 @@ const DoctorsPanelPage = ({ doctorId: propDoctorId }) => {
             Authorization: `Bearer ${token}`
           }
         });
-        console.log('DoctorsPanelPage: Response data:', response.data);
         setAppointments(response.data);
         setLoading(false);
       } catch (err) {
         console.error('DoctorsPanelPage: Fetch error:', err);
-        if (err.response && err.response.status === 401) {
-          setError('Authentication failed. Please log in again.');
-          navigate('/admin-login');
-        } else {
-          setError('Failed to fetch appointments. Please try again later.');
-        }
+        setError('Failed to fetch appointments. Please try again later.');
         setLoading(false);
       }
     };
 
-    if (effectiveDoctorId) {
-      fetchAppointments();
-    } else {
-      console.log('DoctorsPanelPage: No doctorId available, redirecting to login');
-      navigate('/admin-login');
-    }
+    fetchAppointments();
   }, [effectiveDoctorId, navigate]);
+
+  if (loading) return <div className="doctors-panel">Loading...</div>;
+  if (error) return <div className="doctors-panel">Error: {error}</div>;
+
   return (
-    <div>
-      <h1>Doctor's Panel</h1>
-      <h2>Appointments</h2>
+    <div className="doctors-panel">
+      <h1>Doctors Panel</h1>
+      <h2>Your Appointments</h2>
       {appointments.length === 0 ? (
-        <p>No appointments scheduled.</p>
+        <p className="no-appointments">No appointments scheduled.</p>
       ) : (
-        <ul>
-          {appointments.map((appointment, index) => (
-            <li key={index}>
-              <p>Patient: {appointment.patientName}</p>
-              <p>Email: {appointment.userEmail}</p>
-              <p>Date: {appointment.date}</p>
-              <p>Time: {appointment.time}</p>
-              <p>Room: {appointment.roomCode}</p>
-              <p>Issues: {appointment.issues}</p>
-            </li>
-          ))}
-        </ul>
+        <table className="appointments-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Patient</th>
+              <th>Email</th>
+              <th>Room Code</th>
+              <th>Issues</th>
+            </tr>
+          </thead>
+          <tbody>
+            {appointments.map((appointment, index) => (
+              <tr key={index}>
+                <td className="appointment-date">{appointment.date}</td>
+                <td className="appointment-time">{appointment.time}</td>
+                <td className="patient-name">{appointment.patientName}</td>
+                <td className="patient-email">{appointment.userEmail}</td>
+                <td className="room-code">{appointment.roomCode}</td>
+                <td className="issues">{appointment.issues}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );

@@ -16,7 +16,7 @@
     background-color: #007bff;
     color: #fff;
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
     font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
@@ -63,7 +63,8 @@
 
 
   /* Signup container styles */
-.signup-container {
+  .login-container,
+  .signup-container {
     background-color: #ffffff;
     padding: 40px;
     border-radius: 10px;

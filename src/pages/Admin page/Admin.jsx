@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import io from 'socket.io-client';
 import './Admin.css';
+import './AdminTable.css';
 import AdminManagement from './AdminManagement';
 
 const AdminPage = () => {

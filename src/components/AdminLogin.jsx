@@ -28,7 +28,7 @@ const AdminLogin = ({ onLogin }) => {
   
       const { token, userType: responseUserType, username: responseUsername, userId, doctorId } = response.data;
   
-      if (!token || !responseUserType || !responseUsername) {
+      if (!token || !responseUserType || !responseUsername || !userId) {
         console.error('Invalid response structure:', response.data);
         throw new Error('Invalid response from server');
       }
@@ -38,12 +38,7 @@ const AdminLogin = ({ onLogin }) => {
       localStorage.setItem('token', token);
       localStorage.setItem('userType', responseUserType);
       localStorage.setItem('username', responseUsername);
-      
-      if (userId) {
-        localStorage.setItem('userId', userId);
-      } else {
-        console.warn('userId not provided by server');
-      }
+      localStorage.setItem('userId', userId);
       
       if (responseUserType === 'doctor') {
         if (doctorId) {
@@ -51,17 +46,17 @@ const AdminLogin = ({ onLogin }) => {
           console.log('Stored doctorId in localStorage:', doctorId);
         } else {
           console.warn('Doctor ID not provided by server, using userId as fallback');
-          localStorage.setItem('doctorId', userId || '');
+          localStorage.setItem('doctorId', userId);
         }
       }
   
-      console.log('Calling onLogin with:', responseUserType, userId || '', doctorId || userId || '');
-      onLogin(responseUserType, userId || '', doctorId || userId || '');
+      console.log('Calling onLogin with:', responseUserType, userId, doctorId || userId);
+      onLogin(responseUserType, userId, doctorId || userId);
   
       if (responseUserType === 'admin') {
         navigate('/admin');
       } else if (responseUserType === 'doctor') {
-        navigate(`/doctor/${doctorId || userId || ''}`);
+        navigate(`/doctor/${doctorId || userId}`);
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -70,7 +65,7 @@ const AdminLogin = ({ onLogin }) => {
   };
 
   // ... rest of the component (return statement) remains the same
-   return (
+  return (
     <div className="adminlogin-container">
       <div className="card">
         <div className="card-header">
