@@ -6,10 +6,12 @@ const Signup = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
       const response = await fetch('/api/user/signup', {
         method: 'POST',
@@ -18,14 +20,13 @@ const Signup = () => {
       });
       const data = await response.json();
       if (response.ok) {
-        alert('Signup successful! Please login.');
         navigate('/login');
       } else {
-        alert(data.message);
+        setError(data.message || 'Signup failed. Please try again.');
       }
     } catch (error) {
       console.error('Signup error:', error);
-      alert('An error occurred during signup');
+      setError('An error occurred during signup. Please try again later.');
     }
   };
 
@@ -33,6 +34,7 @@ const Signup = () => {
     <div className="signup-container">
       <h2>Sign Up</h2>
       <form onSubmit={handleSubmit}>
+        {error && <div className="error-message">{error}</div>}
         <input
           type="text"
           value={name}

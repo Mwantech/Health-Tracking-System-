@@ -29,8 +29,7 @@ const AdminLogin = ({ onLogin }) => {
       const { token, userType: responseUserType, username: responseUsername, userId, doctorId } = response.data;
   
       if (!token || !responseUserType || !responseUsername || !userId) {
-        console.error('Invalid response structure:', response.data);
-        throw new Error('Invalid response from server');
+        throw new Error('Invalid response structure from server');
       }
   
       console.log('Parsed response:', { token, responseUserType, responseUsername, userId, doctorId });
@@ -57,14 +56,36 @@ const AdminLogin = ({ onLogin }) => {
         navigate('/admin');
       } else if (responseUserType === 'doctor') {
         navigate(`/doctor/${doctorId || userId}`);
+      } else {
+        throw new Error('Unexpected user type');
       }
     } catch (error) {
       console.error('Login error:', error);
-      setError(error.response?.data?.message || error.message || 'An error occurred during login');
+      if (error.response) {
+        const statusCode = error.response.status;
+        const errorMessage = error.response.data.message;
+
+        switch (statusCode) {
+          case 400:
+            setError('Invalid input. Please check your username and password.');
+            break;
+          case 401:
+            setError('Authentication failed. Please check your credentials.');
+            break;
+          case 403:
+            setError('Access denied. You do not have permission to log in as this user type.');
+            break;
+          default:
+            setError(errorMessage || 'An error occurred during login. Please try again later.');
+        }
+      } else if (error.request) {
+        setError('No response received from the server. Please check your internet connection.');
+      } else {
+        setError(error.message || 'An unexpected error occurred. Please try again.');
+      }
     }
   };
 
-  // ... rest of the component (return statement) remains the same
   return (
     <div className="adminlogin-container">
       <div className="card">
@@ -73,6 +94,11 @@ const AdminLogin = ({ onLogin }) => {
         </div>
         <div className="card-content">
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="alert">
+                <span className="alert-description">{error}</span>
+              </div>
+            )}
             <div>
               <label htmlFor="userType" className="block text-sm font-medium text-gray-700">
                 Login As
@@ -113,11 +139,6 @@ const AdminLogin = ({ onLogin }) => {
                 required
               />
             </div>
-            {error && (
-              <div className="alert">
-                <span className="alert-description">{error}</span>
-              </div>
-            )}
             <button type="submit" className="button">
               Login
             </button>

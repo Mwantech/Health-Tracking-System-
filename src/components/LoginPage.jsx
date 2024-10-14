@@ -5,10 +5,12 @@ import './Login.css'
 const Login = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
       const response = await fetch('/api/user/login', {
         method: 'POST',
@@ -20,11 +22,11 @@ const Login = ({ onLogin }) => {
         onLogin(data.type, data.id, data.token);
         navigate('/');
       } else {
-        alert(data.message);
+        setError(data.message || 'Login failed. Please check your credentials.');
       }
     } catch (error) {
       console.error('Login error:', error);
-      alert('An error occurred during login');
+      setError('An error occurred during login. Please try again later.');
     }
   };
 
@@ -32,6 +34,7 @@ const Login = ({ onLogin }) => {
     <div className="login-container">
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
+        {error && <div className="error-message">{error}</div>}
         <input
           type="email"
           value={email}
@@ -49,7 +52,7 @@ const Login = ({ onLogin }) => {
         <button type="submit">Login</button>
       </form>
       <p>
-        Don't have an account? <Link to="/signup">Sign up here</Link>
+        Dont have an account? <Link to="/signup">Sign up here</Link>
       </p>
     </div>
   );
