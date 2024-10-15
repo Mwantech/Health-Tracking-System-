@@ -7,7 +7,7 @@ import './footer.css';
 const Footer = () => {
   return (
     <footer>
-      <div className="container">
+      <div className="footer-container">
         <div className="footer-links">
           <Link to="#">Privacy Policy</Link>
           <Link to="#">Terms of Service</Link>

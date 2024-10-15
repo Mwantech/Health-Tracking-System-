@@ -1,18 +1,18 @@
 /* General table styles */
-table {
+.admin-card table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
   }
   
-  th, td {
+  .admin-card th, td {
     padding: 12px 15px;
     text-align: left;
     border-bottom: 1px solid #e0e0e0;
   }
   
-  th {
+  .admin-card th {
     background-color: #f5f5f5;
     font-weight: bold;
     text-transform: uppercase;
@@ -20,48 +20,48 @@ table {
     color: #333;
   }
   
-  tr:hover {
+  .admin-card tr:hover {
     background-color: #f9f9f9;
   }
   
   /* Specific styles for each table */
-  .orders-table th {
+  .admin-card .orders-table th {
     background-color: #e6f3ff;
   }
   
-  .doctors-table th {
+  .admin-card .doctors-table th {
     background-color: #e6ffe6;
   }
   
-  .health-issues-table th {
+  .admin-card .health-issues-table th {
     background-color: #fff0e6;
   }
   
-  .test-kits-table th {
+  .admin-card .test-kits-table th {
     background-color: #f0e6ff;
   }
   
   /* Status column in orders table */
-  .orders-table .status-column {
+  .admin-card .orders-table .status-column {
     font-weight: bold;
   }
   
-  .status-pending { color: #ffa500; }
-  .status-processing { color: #1e90ff; }
-  .status-shipped { color: #32cd32; }
-  .status-delivered { color: #008000; }
+  .admin-card .status-pending { color: #ffa500; }
+  .admin-card .status-processing { color: #1e90ff; }
+  .admin-card .status-shipped { color: #32cd32; }
+  .admin-card .status-delivered { color: #008000; }
   
   /* Price column in doctors and test kits tables */
-  .price-column {
+  .admin-card .price-column {
     text-align: right;
   }
   
   /* Actions column */
-  .actions-column {
+  .admin-card .actions-column {
     text-align: center;
   }
   
-  .actions-column button {
+ .admin-card .actions-column button {
     padding: 5px 10px;
     background-color: #f44336;
     color: white;
@@ -71,33 +71,33 @@ table {
     transition: background-color 0.3s;
   }
   
-  .actions-column button:hover {
+ .admin-card .actions-column button:hover {
     background-color: #d32f2f;
   }
   
   /* Responsive design for smaller screens */
   @media screen and (max-width: 600px) {
-    table, thead, tbody, th, td, tr {
+   .admin-card table, thead, tbody, th, td, tr {
       display: block;
     }
     
-    thead tr {
+   .admin-card thead tr {
       position: absolute;
       top: -9999px;
       left: -9999px;
     }
     
-    tr {
+   .admin-card tr {
       margin-bottom: 15px;
     }
     
-    td {
+   .admin-card td {
       border: none;
       position: relative;
       padding-left: 50%;
     }
     
-    td:before {
+   .admin-card td:before {
       position: absolute;
       top: 6px;
       left: 6px;

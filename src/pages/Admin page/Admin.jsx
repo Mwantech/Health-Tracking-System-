@@ -171,7 +171,7 @@ const AdminPage = () => {
   // ... (keep all existing render functions)
   const renderOrdersManagement = () => (
     <div className="admin-card">
-      <h2>Orders Management</h2>
+      <h2 className='admin-header'>Orders Management</h2>
       <table>
         <thead>
           <tr>
@@ -210,7 +210,7 @@ const AdminPage = () => {
  // Modify the existing renderDoctorManagement function to include password field
  const renderDoctorManagement = () => (
     <div className="admin-card">
-      <h2>Doctor Management</h2>
+      <h2 className='admin-header'>Doctor Management</h2>
       <form onSubmit={addDoctor}>
         <input
           type="text"
@@ -281,7 +281,7 @@ const AdminPage = () => {
 
   const renderHealthIssueManagement = () => (
     <div className="admin-card">
-      <h2>Health Issue Management</h2>
+      <h2 className='admin-header'>Health Issue Management</h2>
       <form onSubmit={addHealthIssue}>
         <input
           type="text"
@@ -330,7 +330,7 @@ const AdminPage = () => {
 
   const renderTelemedicinePricing = () => (
     <div className="admin-card">
-      <h2>Telemedicine Pricing</h2>
+      <h2 className='admin-header'>Telemedicine Pricing</h2>
       <form onSubmit={updateTelemedicinePricing}>
         <div>
           <label>Base Fee:</label>
@@ -355,7 +355,7 @@ const AdminPage = () => {
 
   const renderTestKitManagement = () => (
     <div className="admin-card">
-      <h2>Test Kit Management</h2>
+      <h2 className='admin-header'>Test Kit Management</h2>
       <form onSubmit={addTestKit}>
         <input
           type="text"

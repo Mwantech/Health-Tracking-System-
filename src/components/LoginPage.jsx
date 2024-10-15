@@ -51,7 +51,7 @@ const Login = ({ onLogin }) => {
         />
         <button type="submit">Login</button>
       </form>
-      <p>
+      <p className='p1'>
         Dont have an account? <Link to="/signup">Sign up here</Link>
       </p>
     </div>

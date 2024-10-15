@@ -13,7 +13,7 @@
   .login-container button {
     width: 100%;
     padding: 12px;
-    background-color: #007bff;
+    background-color: #009688;
     color: #fff;
     border: none;
     border-radius: 10px;
@@ -21,10 +21,13 @@
     cursor: pointer;
     transition: background-color 0.3s ease;
   }
+  .login-container .p1{
+    color: #333333;
+  }
   
   /* Button hover effect */
   .login-container button:hover {
-    background-color: #0056b3;
+    background-color: #4CAf50;
   }
   
   /* Link text styling */
@@ -34,7 +37,7 @@
   }
   
   .login-container p a {
-    color: #007bff;
+    color: #009688;
     text-decoration: none;
     font-weight: bold;
     transition: color 0.3s ease;
@@ -42,7 +45,7 @@
   
   /* Link hover effect */
   .login-container p a:hover {
-    color: #0056b3;
+    color: #4CAf50;
   }
   
   /* Responsive design */
@@ -72,8 +75,14 @@
     width: 100%;
     max-width: 400px;
     text-align: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    margin-left: 250px;
   }
-  
+  .login-container,
+  .signup-container .error-message{
+    color: #F44336;
+  }
   /* Heading styles */
   .signup-container h2 {
     font-size: 2rem;

@@ -18,21 +18,21 @@
   margin-bottom: 15px;
 }
 
-.appointments-table {
+.doctors-panel .appointments-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
   box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
 }
 
-.appointments-table th,
+.doctors-panel .appointments-table th,
 .appointments-table td {
   padding: 12px 15px;
   text-align: left;
   border-bottom: 1px solid #ddd;
 }
 
-.appointments-table th {
+.doctors-panel .appointments-table th {
   background-color: #f8f8f8;
   font-weight: bold;
   color: #333;
@@ -40,48 +40,48 @@
   font-size: 0.85em;
 }
 
-.appointments-table tr:nth-child(even) {
+.doctors-panel .appointments-table tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-.appointments-table tr:hover {
+.doctors-panel .appointments-table tr:hover {
   background-color: #f5f5f5;
 }
 
-.appointment-date {
+.doctors-panel .appointment-date {
   font-weight: bold;
   color: #2c3e50;
 }
 
-.appointment-time {
+.doctors-panel .appointment-time {
   color: #7f8c8d;
 }
 
-.patient-name {
+.doctors-panel .patient-name {
   font-weight: bold;
   color: #2980b9;
 }
 
-.patient-email {
+.doctors-panel .patient-email {
   color: #666;
   font-size: 0.9em;
 }
 
-.room-code {
+.doctors-panel .room-code {
   font-family: monospace;
   background-color: #ecf0f1;
   padding: 2px 5px;
   border-radius: 3px;
 }
 
-.issues {
+.doctors-panel .issues {
   max-width: 300px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.no-appointments {
+.doctors-panel .no-appointments {
   text-align: center;
   color: #7f8c8d;
   font-style: italic;
@@ -89,16 +89,16 @@
 }
 
 @media (max-width: 768px) {
-  .appointments-table {
+  .doctors-panel .appointments-table {
     font-size: 0.9em;
   }
 
-  .appointments-table th,
+  .doctors-panel .appointments-table th,
   .appointments-table td {
     padding: 10px;
   }
 
-  .issues {
+  .doctors-panel .issues {
     max-width: 150px;
   }
 }
