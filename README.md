@@ -1,7 +1,4 @@
-Here's the updated README file with values for email API, JWT token configuration, and MySQL database setup:
 
-
----
 
 Health Tracking System
 
